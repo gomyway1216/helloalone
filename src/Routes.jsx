@@ -1,14 +1,22 @@
-import React from 'react'
-import { Redirect } from 'react-router-dom'
-import { Route,  Switch } from 'react-router-dom'
-import Home from './Page/Home'
+import React from 'react';
+import {
+  Route,
+  Switch
+} from 'react-router-dom';
+import HomePage from './Page/HomePage';
+import CreateBlogPage from './Page/CreateBlogPage';
+import BlogListPage from './Page/BlogListPage';
+import RankingPage from './Page/RankingPage';
 
 const Routes = () => {
   return (
     <Switch>
-      <Route path='/' component={Home} exact></Route>
+      <Route path='/' component={HomePage} exact />
+      <Route path='/create' component={CreateBlogPage} />
+      <Route path='/blog' component={BlogListPage} />
+      <Route path='/ranking' component={RankingPage} />
     </Switch>
-  )
-}
+  );
+};
 
 export default Routes;
