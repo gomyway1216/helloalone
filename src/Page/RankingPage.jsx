@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as blogApi from '../Firebase/blog';
-import { TextField, Button } from '@material-ui/core';
+import { TextField, Button, List, ListItem, ListItemText } from '@material-ui/core';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
+import DescriptionDialog from '../Component/DescriptionDialog';
 
 const RANK_1 = 'rank-1';
 const RANK_2 = 'rank-2';
@@ -10,6 +11,9 @@ const RANK_3 = 'rank-3';
 const RANK_4 = 'rank-4';
 const RANK_5 = 'rank-5';
 const UNCLASSIFIED = 'unclassified';
+const VIEW_MODE = 'view_mode';
+const EDIT_MODE = 'edit_mode';
+const DELETE_MODE = 'delete_mode';
 
 const RankingPage = () => {
   const defaultInput = {
@@ -47,7 +51,10 @@ const RankingPage = () => {
   };
 
   const [animeInput, setAnimeInput] = useState(defaultInput);
+  const [animeList, setAnimeList] = useState([]);
   const [categorizedAnimeList, setCategorizedAnimeList] = useState(defaultCategories);
+  const [openingDialogId, setOpenDialogId] = useState('');
+  const [dialogMode, setDialogMode] = useState();
 
   const onAnimeInputChange = e => {
     setAnimeInput({
@@ -58,11 +65,60 @@ const RankingPage = () => {
 
   const onAnimeInputSave = () => {
     blogApi.addAnimeItem(animeInput)
-      .then(() => {
-        blogApi.addCategorizedAnimeItem(UNCLASSIFIED, animeInput)
+      .then(id => {
+        const inputWithId = {
+          ...animeInput,
+          originalId: id
+        };
+        blogApi.addCategorizedAnimeItem(UNCLASSIFIED, inputWithId)
           .then(() => {
             setAnimeInput(defaultInput);
           })
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  };
+
+  const onAnimeInputUpdate = (item) => {
+    let collectionId;
+    let itemId;
+    for (const key in categorizedAnimeList) {
+      const pair = categorizedAnimeList[key];
+      const foundItem = pair.items.find(o => o.originalId === openingDialogId);
+      if(foundItem) {
+        collectionId = key;
+        itemId = foundItem.id;
+        break;
+      }
+    }
+
+    blogApi.updateAnimeItem(item)
+      .then(() => {
+        item.id = itemId;
+        blogApi.updateCategorizedAnimeItem(collectionId, item)
+          .then(() => handleCloseDialog())
+          .catch(err => console.log(err));
+      })
+      .catch(err => console.log(err));
+  };
+
+  const onAnimeItemDelete = () => {
+    let collectionId;
+    let itemId;
+    for (const key in categorizedAnimeList) {
+      const pair = categorizedAnimeList[key];
+      const foundItem = pair.items.find(o => o.originalId === openingDialogId);
+      if(foundItem) {
+        collectionId = key;
+        itemId = foundItem.id;
+        break;
+      }
+    }
+
+    blogApi.deletedAnimeItem(openingDialogId)
+      .then(() => {
+        blogApi.deleteCategorizedAnimeItem(collectionId, itemId)
+          .then(() => handleCloseDialog())
           .catch(err => console.log(err));
       })
       .catch(err => console.log(err));
@@ -77,6 +133,20 @@ const RankingPage = () => {
     blogApi.addCategorizedAnimeItem(category, item)
       .catch(err => console.log(err));
   };
+
+  useEffect(() => {
+    const unsubscribe = blogApi.streamAnimeList({
+      next: querySnapshot => {
+        const updateAnimeItems = 
+        querySnapshot.docs.map(docSnapShot => {
+          return { id: docSnapShot.id, ...docSnapShot.data()};
+        });
+        setAnimeList(updateAnimeItems);
+      },
+      error: () => console.log('error')
+    });
+    return unsubscribe;
+  }, [setAnimeList]);
 
   useEffect(() => {
     blogApi.streamCategorizedAnimeList(UNCLASSIFIED, {
@@ -219,65 +289,85 @@ const RankingPage = () => {
     }
   };
 
+  const handleOpenDialog = (id, mode) => {
+    setOpenDialogId(id);
+    setDialogMode(mode);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialogId('');
+    setDialogMode('');
+  };
+
   return (
     <div>
-      <div>
-        <TextField id="title" name="title" label="Title" value={animeInput.title} onChange={onAnimeInputChange} />
-        <TextField id="description" name="description" multiline label="Description" value={animeInput.description} onChange={onAnimeInputChange} />
-        <TextField id="short" name="short" label="Short title" value={animeInput.short} onChange={onAnimeInputChange} />
-        <Button variant="contained" color="primary" onClick={onAnimeInputSave} >Save </ Button>
-      </div>
       <h1>Watched Anime List</h1>
-      <div style={{ display: 'flex', justifyContent: 'center', height: '100%' }} >
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }} >
         <DragDropContext onDragEnd={handleDrag} >
           {Object.entries(categorizedAnimeList).map(([columnId, column]) => (
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              alignItems: 'center'
+              // alignItems: 'center',
+              overflow: 'auto'
             }}
             key={columnId}>
-              <h2>{column.name}</h2>
+              <div style={{fontSize: 20}}>{column.name}</div>
               <div style={{ margin: 8 }}>
-                <Droppable droppableId={columnId} key={columnId} >
+                <Droppable direction="horizontal" droppableId={columnId} key={columnId} >
                   { (provided, snapshot) => (
                     <div
                       {...provided.droppableProps}
                       ref={provided.innerRef}
                       style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        // overflow: 'auto',
+                        flexWrap: 'wrap',
                         background: snapshot.isDraggingOver
                           ? 'lightblue'
-                          : 'lightgrey',
+                          : 'LavenderBlush',
                         padding: 4,
-                        width: 250,
-                        minHeight: 500
+                        // width: 250,
+                        minWidth: 200,
+                        minHeight: 50
                       }}
                     >
                       {column.items.map((item, index) => (
+                        
                         <Draggable
                           key={item.id}
                           draggableId={item.id}
                           index={index}
                         >
                           {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              style={{
-                                userSelect: 'none',
-                                padding: 16,
-                                margin: '0 0 8px 0',
-                                minHeight: '50px',
-                                backgroundColor: snapshot.isDragging
-                                  ? '#263B4A'
-                                  : '#456C86',
-                                color: 'white',
-                                ...provided.draggableProps.style
-                              }}
-                            >
-                              {item.title}
-                            </div>
+                            <>
+                              <div
+                                ref={provided.innerRef}
+                                {...provided.draggableProps}
+                                {...provided.dragHandleProps}
+                                style={{
+                                  userSelect: 'none',
+                                  padding: 8,
+                                  margin: '0 0 8px 0',
+                                  // minHeight: '10px',
+                                  backgroundColor: snapshot.isDragging
+                                    ? 'LawnGreen'
+                                    : 'FloralWhite',
+                                  color: 'blue',
+                                  ...provided.draggableProps.style,
+                                  borderStyle: 'solid',
+                                  borderColor: 'Lavender',
+                                  borderRadius: 25
+                                }}
+                                onClick={() => handleOpenDialog(item.id, VIEW_MODE)}
+                              >
+                                {item.title}
+                              </div>
+                              <DescriptionDialog id={item.id} dialogMode={VIEW_MODE} 
+                                open={openingDialogId === item.id && dialogMode === VIEW_MODE} 
+                                animeObj={item} onClose={handleCloseDialog} />
+                            </>
                           )}
                         </Draggable>
                       )
@@ -292,6 +382,36 @@ const RankingPage = () => {
           )}
         </DragDropContext>  
       </div>
+      <div>
+        <h1>Add Anime</h1>
+        <TextField id="title" name="title" label="Title" value={animeInput.title} onChange={onAnimeInputChange} />
+        <TextField id="description" name="description" multiline label="Description" 
+          value={animeInput.description} onChange={onAnimeInputChange} />
+        <TextField id="short" name="short" label="Short title" value={animeInput.short} onChange={onAnimeInputChange} />
+        <Button variant="contained" color="primary" onClick={onAnimeInputSave} >Save</ Button>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'row' }}>
+        <List component="nav" style={{ maxHeight: 500, width: 400, overflow: 'auto'}}>
+          {animeList.map((animeItem) => (
+            <ListItem button key={animeItem.id} style={{ background: openingDialogId === animeItem.id 
+              ? 'Cyan'
+              : 'AliceBlue'}} 
+            onClick={() => setOpenDialogId(animeItem.id)}>
+              <ListItemText primary={animeItem.title} />
+            </ListItem>
+          ))}
+        </List>
+        <div style={{margin: 30}}>
+          <Button variant="contained" color="primary" onClick={() => setDialogMode(EDIT_MODE)} style={{margin: 20}}>Edit</ Button>
+          <Button variant="contained" color="secondary" onClick={() => setDialogMode(DELETE_MODE)}>Delete</ Button>
+        </div>
+      </div>
+      {(dialogMode === EDIT_MODE && openingDialogId && animeList.find(o => o.id === openingDialogId)) && 
+        <DescriptionDialog dialogMode={EDIT_MODE} animeObj={animeList.find(o => o.id === openingDialogId)} 
+          open={dialogMode === EDIT_MODE} onClose={handleCloseDialog} onSave={onAnimeInputUpdate}/>}
+      {(dialogMode === DELETE_MODE && openingDialogId && animeList.find(o => o.id === openingDialogId)) && 
+        <DescriptionDialog dialogMode={DELETE_MODE} animeObj={animeList.find(o => o.id === openingDialogId)} 
+          open={dialogMode === DELETE_MODE} onClose={handleCloseDialog} onDelete={onAnimeItemDelete}/>}
     </div>
   );
 };

@@ -42,7 +42,8 @@ export const addAnimeItem = (item) => {
             title: item.title,
             description: item.description,
             short: item.short
-          });
+          })
+          .then(docRef => docRef.id);
       } else { 
         return matchingItem.update({
           title: item.title,
@@ -63,6 +64,7 @@ export const addCategorizedAnimeItem = (category, item) => {
           .doc('categorizedAnimeList')
           .collection(category)
           .add({
+            originalId: item.originalId,
             title: item.title,
             description: item.description,
             short: item.short
@@ -77,8 +79,26 @@ export const addCategorizedAnimeItem = (category, item) => {
     });
 };
 
-export const deletedAnimeItem = (id, category) => {
-  return getDbAccess().collection('anime').doc('animeList').collection(category)
+export const updateAnimeItem = (item) => {
+  return getDbAccess().collection('anime').doc('animeList').collection('items')
+    .doc(item.id).update({
+      title: item.title,
+      description: item.description,
+      short: item.short
+    });
+};
+
+export const updateCategorizedAnimeItem = (category, item) => {
+  return getDbAccess().collection('anime').doc('categorizedAnimeList').collection(category)
+    .doc(item.id).update({
+      title: item.title,
+      description: item.description,
+      short: item.short
+    });
+};
+
+export const deletedAnimeItem = (id) => {
+  return getDbAccess().collection('anime').doc('animeList').collection('items')
     .doc(id).delete();
 };
 
