@@ -6,7 +6,7 @@ import {
 import HomePage from './Page/HomePage';
 import CreateBlogPage from './Page/CreateBlogPage';
 import BlogListPage from './Page/BlogListPage';
-import RankingPage from './Page/RankingPage';
+import RankingPage from './Page/Ranking/RankingPage';
 
 const Routes = () => {
   return (

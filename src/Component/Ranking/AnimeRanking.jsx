@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import * as blogApi from '../Firebase/blog';
+import * as blogApi from '../../Firebase/blog';
 import { TextField, Button, List, ListItem, ListItemText } from '@material-ui/core';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import DescriptionDialog from '../Component/DescriptionDialog';
+import DescriptionDialog from '../DescriptionDialog';
+import * as rankingConstants from './constants';
 
 const RANK_1 = 'rank-1';
 const RANK_2 = 'rank-2';
@@ -15,44 +16,10 @@ const VIEW_MODE = 'view_mode';
 const EDIT_MODE = 'edit_mode';
 const DELETE_MODE = 'delete_mode';
 
-const RankingPage = () => {
-  const defaultInput = {
-    id: '',
-    title: '',
-    description: '',
-    short: ''
-  };
-
-  const defaultCategories = {
-    'rank-1': {
-      name: 'Rank 1',
-      items: []
-    },
-    'rank-2': {
-      name: 'Rank 2',
-      items: []
-    },
-    'rank-3': {
-      name: 'Rank 3',
-      items: []
-    },
-    'rank-4': {
-      name: 'Rank 4',
-      items: []
-    },
-    'rank-5': {
-      name: 'Rank 5',
-      items: []
-    },
-    'unclassified': {
-      name: 'Unclassified',
-      items: []
-    }
-  };
-
-  const [animeInput, setAnimeInput] = useState(defaultInput);
+const AnimeRanking = () => {
+  const [animeInput, setAnimeInput] = useState(rankingConstants.defaultInput);
   const [animeList, setAnimeList] = useState([]);
-  const [categorizedAnimeList, setCategorizedAnimeList] = useState(defaultCategories);
+  const [categorizedAnimeList, setCategorizedAnimeList] = useState(rankingConstants.defaultCategories);
   const [openingDialogId, setOpenDialogId] = useState('');
   const [dialogMode, setDialogMode] = useState();
 
@@ -72,7 +39,7 @@ const RankingPage = () => {
         };
         blogApi.addCategorizedAnimeItem(UNCLASSIFIED, inputWithId)
           .then(() => {
-            setAnimeInput(defaultInput);
+            setAnimeInput(rankingConstants.defaultInput);
           })
           .catch(err => console.log(err));
       })
@@ -416,8 +383,8 @@ const RankingPage = () => {
   );
 };
 
-export default RankingPage;
+export default AnimeRanking;
 
-RankingPage.propTypes = {
+AnimeRanking.propTypes = {
   history: PropTypes.object
 };
