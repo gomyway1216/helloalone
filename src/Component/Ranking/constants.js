@@ -1,6 +1,6 @@
 export const defaultInput = {
-  id: '',
   title: '',
+  rank: 'unclassified',
   description: '',
   short: ''
 };
