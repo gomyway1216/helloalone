@@ -15,12 +15,6 @@ export const addBlog = (value) => {
   return getDbAccess().collection('blog').doc(value.title).set(value);
 };
 
-const createListName = (itemName) => {
-  const val = 'categorized' + itemName.charAt(0).toUpperCase() + itemName.slice(1) + 'List';
-  console.log('val in createListName: {}', val);
-  return val;
-};
-
 export const getBlogListId = () => {
   return getDbAccess().collection('blog').get().then((querySnapshot) => {
     const list = [];
@@ -35,160 +29,66 @@ export const getBlogListId = () => {
   });
 };
 
-export const addAnimeItem = (item) => {
-  return getAnimeList()
+export const addItem = (userName, itemName, item) => {
+  return getItemList(userName, itemName)
     .then(querySnapshot => querySnapshot.docs)
-    .then(animeItems => animeItems.find(animeItem => animeItem.data().title.toLowerCase() === item.title.toLowerCase()))
-    .then(matchingItem => {
-      if(!matchingItem) {
-        return getDbAccess().collection('anime')
-          .doc('animeList')
-          .collection('items')
+    .then(items => items.find(elem => elem.data().title.toLowerCase() === item.title.toLowerCase()))
+    .then(matchedItem => {
+      if(!matchedItem) {
+        return getDbAccess().collection(userName)
+          .doc(itemName)
+          .collection(itemName + 'List')
           .add({
             title: item.title,
             description: item.description,
-            short: item.short
+            short: item.short,
+            category: item.category,
+            order: item.order
           })
           .then(docRef => docRef.id);
       } else { 
-        return matchingItem.update({
-          title: item.title,
-          description: item.description,
-          short: item.short
-        });
+        throw new Error('the adding item exists');
       }
     });
 };
 
-export const addCategorizedAnimeItem = (category, item) => {
-  return getCategorizedAnimeList(category)
-    .then(querySnapshot => querySnapshot.docs)
-    .then(animeItems => animeItems.find(animeItem => animeItem.data().title.toLowerCase() === item.title.toLowerCase()))
-    .then(matchingItem => {
-      if(!matchingItem) {
-        return getDbAccess().collection('anime')
-          .doc('categorizedAnimeList')
-          .collection(category)
-          .add({
-            originalId: item.originalId,
-            title: item.title,
-            description: item.description,
-            short: item.short
-          });
-      } else { 
-        return matchingItem.update({
-          title: item.title,
-          description: item.description,
-          short: item.short
-        });
-      }
-    });
-};
-
-export const addCategorizedItem = (itemName, category, item) => {
-  return getCategorizedItemList(itemName, category)
-    .then(querySnapshot => querySnapshot.docs)
-    .then(items => items.find(element => element.data().title.toLowerCase() === item.title.toLowerCase()))
-    .then(matchingItem => {
-      if(!matchingItem) {
-        return getDbAccess().collection(itemName)
-          .doc(createListName(itemName))
-          .collection(category)
-          .add({
-            title: item.title,
-            description: item.description,
-            short: item.short
-          });
-      } else { 
-        return matchingItem.update({
-          title: item.title,
-          description: item.description,
-          short: item.short
-        });
-      }
-    });
-};
-
-export const updateAnimeItem = (item) => {
-  return getDbAccess().collection('anime').doc('animeList').collection('items')
+export const updateItem = (userName, itemName, item) => {
+  return getDbAccess().collection(userName).doc(itemName).collection(itemName + 'List')
     .doc(item.id).update({
       title: item.title,
       description: item.description,
-      short: item.short
+      short: item.short,
+      category: item.category,
+      order: item.order
     });
 };
 
-export const updateCategorizedAnimeItem = (category, item) => {
-  return getDbAccess().collection('anime').doc('categorizedAnimeList').collection(category)
-    .doc(item.id).update({
-      title: item.title,
-      description: item.description,
-      short: item.short
-    });
+export const setRankingCount = (userName, itemName, count) => {
+  return getDbAccess().collection(userName).doc(itemName).set({rankingCount: count}, {merge: true});
 };
 
-export const updateCategorizedItem = (itemName, category, item) => {
-  return getDbAccess().collection(itemName).doc(createListName(itemName)).collection(category)
-    .doc(item.id).update({
-      title: item.title,
-      description: item.description,
-      short: item.short
-    });
-};
-
-export const deletedAnimeItem = (id) => {
-  return getDbAccess().collection('anime').doc('animeList').collection('items')
+export const deleteItem = (userName, itemName, id) => {
+  return getDbAccess().collection(userName).doc(itemName).collection(itemName + 'List')
     .doc(id).delete();
 };
 
-export const deleteCategorizedAnimeItem = (category, id) => {
-  return getDbAccess().collection('anime').doc('categorizedAnimeList').collection(category)
-    .doc(id).delete();
-};
-
-export const deleteCategorizedItem = (itemName, category, id) => {
-  return getDbAccess().collection(itemName).doc(createListName(itemName)).collection(category)
-    .doc(id).delete();
-};
-
-export const getAnimeList = () => {
-  return getDbAccess().collection('anime')
-    .doc('animeList')
-    .collection('items')
+export const getItemList = (userName, itemName) => {
+  return getDbAccess().collection(userName)
+    .doc(itemName)
+    .collection(itemName + 'List')
     .get();
 };
 
-export const getCategorizedAnimeList = (category) => {
-  return getDbAccess().collection('anime')
-    .doc('categorizedAnimeList')
-    .collection(category)
-    .get();
-};
-
-export const getCategorizedItemList = (itemName, category) => {
-  return getDbAccess().collection(itemName)
-    .doc(createListName(itemName))
-    .collection(category)
-    .get();
-};
-
-export const streamAnimeList = (observer) => {
-  return getDbAccess().collection('anime')
-    .doc('animeList')
-    .collection('items')
+export const streamItemList = (userName, itemName, observer) => {
+  return getDbAccess().collection(userName)
+    .doc(itemName)
+    .collection(itemName + 'List')
     .onSnapshot(observer);
 };
 
-export const streamCategorizedAnimeList = (category, observer) => {
-  return getDbAccess().collection('anime')
-    .doc('categorizedAnimeList')
-    .collection(category)
+export const streamRankCount = (userName, itemName, observer) => {
+  return getDbAccess().collection(userName)
+    .doc(itemName)
     .onSnapshot(observer);
 };
 
-export const streamCategorizedItemList = (itemName, category, observer) => {
-  return getDbAccess().collection(itemName)
-    .doc(createListName(itemName))
-    .collection(category)
-    .onSnapshot(observer);
-};

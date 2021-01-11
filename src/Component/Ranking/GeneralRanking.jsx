@@ -5,23 +5,21 @@ import { TextField, Button, List, ListItem, ListItemText } from '@material-ui/co
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import DescriptionDialog from '../DescriptionDialog';
 import * as rankingConstants from './constants';
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
+import RemoveIcon from '@material-ui/icons/Remove';
 
-const RANK_1 = 'rank-1';
-const RANK_2 = 'rank-2';
-const RANK_3 = 'rank-3';
-const RANK_4 = 'rank-4';
-const RANK_5 = 'rank-5';
-const UNCLASSIFIED = 'unclassified';
 const VIEW_MODE = 'view_mode';
 const EDIT_MODE = 'edit_mode';
 const DELETE_MODE = 'delete_mode';
+const USER_NAME = 'yyaguchi';
 
 const GeneralRanking = (props) => {
   const { itemName } = props;
-  console.log('itemName: ', itemName);
   const [itemInput, setItemInput] = useState(rankingConstants.defaultInput);
   const [itemList, setItemList] = useState([]);
-  const [categorizedItemList, setCategorizedItemList] = useState(rankingConstants.defaultCategories);
+  const [rawItemList, setRawItemList] = useState([]);
+  const [rankingCount, setRankingCount] = useState(0);
   const [openingDialogId, setOpenDialogId] = useState('');
   const [dialogMode, setDialogMode] = useState();
 
@@ -33,254 +31,99 @@ const GeneralRanking = (props) => {
   };
 
   const onItemInputSave = () => {
-    console.log('onSave itemInput: ', itemInput);
-    // blogApi.addCategorizedItem(itemName, 'items', itemInput)
-    //   .then(id => {
-    //     const inputWithId = {
-    //       ...itemInput,
-    //       originalId: id
-    //     };
-    //     blogApi.addCategorizedItem(itemName, UNCLASSIFIED, inputWithId)
-    //       .then(() => {
-    //         setItemInput(rankingConstants.defaultInput);
-    //       })
-    //       .catch(err => console.log(err));
-    //   })
-    //   .catch(err => console.log(err));
-
-    blogApi.addCategorizedItem(itemName, UNCLASSIFIED, itemInput)
+    blogApi.addItem(USER_NAME, itemName, itemInput)
       .then(() => setItemInput(rankingConstants.defaultInput))
       .catch(err => console.log(err));
   };
 
   const onItemInputUpdate = (item) => {
-    // let collectionId;
-    // let itemId;
-    // for (const key in categorizedItemList) {
-    //   const pair = categorizedItemList[key];
-    //   const foundItem = pair.items.find(o => o.originalId === openingDialogId);
-    //   if(foundItem) {
-    //     collectionId = key;
-    //     itemId = foundItem.id;
-    //     break;
-    //   }
-    // }
-
-    // blogApi.updateCategorizedItem(itemName, 'items', item)
-    //   .then(() => {
-    //     item.id = itemId;
-    //     blogApi.updateCategorizedItem(itemName, collectionId, item)
-    //       .then(() => handleCloseDialog())
-    //       .catch(err => console.log(err));
-    //   })
-    //   .catch(err => console.log(err));
-
-    blogApi.updateCategorizedItem(itemName, collectionId, item)
+    blogApi.updateItem(USER_NAME, itemName, item)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
 
   const onItemDelete = () => {
-    // let collectionId;
-    // let itemId;
-    // for (const key in categorizedItemList) {
-    //   const pair = categorizedItemList[key];
-    //   const foundItem = pair.items.find(o => o.originalId === openingDialogId);
-    //   if(foundItem) {
-    //     collectionId = key;
-    //     itemId = foundItem.id;
-    //     break;
-    //   }
-    // }
-
-    // blogApi.deleteCategorizedItem(itemName, 'items', openingDialogId)
-    //   .then(() => {
-    //     blogApi.deleteCategorizedItem(itemName, collectionId, itemId)
-    //       .then(() => handleCloseDialog())
-    //       .catch(err => console.log(err));
-    //   })
-    //   .catch(err => console.log(err));
-
-    blogApi.deleteCategorizedItem(itemName, collectionId, openingDialogId)
+    blogApi.deleteItem(USER_NAME, itemName, openingDialogId)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
 
-  const handleAppend = (category, item) => {
-    blogApi.addCategorizedItem(itemName, category, item)
-      .catch(err => console.log(err));
-  };
+  // TODO: find better way instead of creating list every time or prevent recreating non-modified list
+  useEffect(() => {
+    blogApi.streamItemList(USER_NAME, itemName, {
+      next: querySnapshot => {
+        const updateItems = querySnapshot.docs.map(docSnapShot => (
+          { id: docSnapShot.id, ...docSnapShot.data()}
+        ));
+        setRawItemList(updateItems);
+        const categorizedList = [];
+        for(let i = 0; i < rankingCount; i++) {
+          const categorizedItem = {
+            category: i.toString(),
+            list: []
+          };
+          categorizedList.push(categorizedItem);
+        }
+        updateItems.map(item => {
+          const categorizedItemArray = categorizedList.filter(e => e.category === item.category);
+          if(categorizedItemArray.length > 0) {
+            categorizedItemArray[0].list.push(item);
+          } else {
+            const list = [];
+            list.push(item);
+            const categorizedItem = {
+              category: item.category,
+              list
+            };
+            categorizedList.push(categorizedItem);
+          }
+        });
 
-  const handleDelete = (category, id) => {
-    console.log('itemName, category, id', itemName, category, id);
-    blogApi.deleteCategorizedItem(itemName, category, id)
-      .catch(err => console.log(err));
-  };
-
-  // useEffect(() => {
-  //   const unsubscribe = blogApi.streamCategorizedItemList(itemName, 'items', {
-  //     next: querySnapshot => {
-  //       const updateItems = 
-  //       querySnapshot.docs.map(docSnapShot => {
-  //         return { id: docSnapShot.id, ...docSnapShot.data()};
-  //       });
-  //       setItemList(updateItems);
-  //     },
-  //     error: () => console.log('error')
-  //   });
-  //   return unsubscribe;
-  // }, [setItemList]);
+        categorizedList.forEach(categorizedItem => categorizedItem.list.sort((a, b) => a.order - b.order));
+        categorizedList.sort((a, b) => a.category - b.category);
+        setItemList(categorizedList);
+      },
+      error: () => console.log('error')
+    });
+  }, [rankingCount]);
 
   useEffect(() => {
-    let tempList = [];
-    blogApi.streamCategorizedItemList(itemName, UNCLASSIFIED, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[UNCLASSIFIED];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [UNCLASSIFIED]: val
-        });
-      },
-      error: () => console.log('error')
+    blogApi.streamRankCount(USER_NAME, itemName, (doc) => {
+      if(doc && doc.exists && !isNaN(doc.data().rankingCount)) {
+        setRankingCount(doc.data().rankingCount);
+      }
     });
-    console.log('tempList 1', tempList);
-    blogApi.streamCategorizedItemList(itemName, RANK_1, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[RANK_1];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [RANK_1]: val
-        });
-      },
-      error: () => console.log('error')
-    });
-    console.log('tempList 2', tempList);
-    blogApi.streamCategorizedItemList(itemName, RANK_2, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[RANK_2];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [RANK_2]: val
-        });
-      },
-      error: () => console.log('error')
-    });
-    console.log('tempList 3', tempList);
-    blogApi.streamCategorizedItemList(itemName, RANK_3, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[RANK_3];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [RANK_3]: val
-        });
-      },
-      error: () => console.log('error')
-    });
-    console.log('tempList 4', tempList);
-    blogApi.streamCategorizedItemList(itemName, RANK_4, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[RANK_4];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [RANK_4]: val
-        });
-      },
-      error: () => console.log('error')
-    });
-    console.log('tempList 5', tempList);
-    blogApi.streamCategorizedItemList(itemName, RANK_5, {
-      next: querySnapshot => {
-        const updateItems = 
-        querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        let val = categorizedItemList[RANK_5];
-        val.items = updateItems;
-        tempList = tempList.concat(updateItems);
-        console.log('updateItems 5', updateItems, tempList);
-        setCategorizedItemList({
-          ...categorizedItemList,
-          [RANK_5]: val
-        });
-      },
-      error: () => console.log('error')
-    });
-    console.log('tempList 6', tempList);
-    setItemList(tempList);
-  }, [setCategorizedItemList]);
+  }, [setRankingCount]);
 
-  console.log('itemList', itemList);
+  const removeItemFromSource = (category, index) => {
+    const categorizedItem = itemList.filter(e => e.category === category)[0];
+    const [item] = categorizedItem.list.splice(index, 1);
+    for(let i = index; i < categorizedItem.list.length; i++) {
+      categorizedItem.list[i].order = categorizedItem.list[i].order - 1;
+      blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[i]);
+    }
+    return item;
+  };
+
+  const addItemToDest = (category, index, item) => {
+    const categorizedItem = itemList.filter(e => e.category === category)[0];
+    for(let i = index; i < categorizedItem.list.length; i++) {
+      categorizedItem.list[i].order = categorizedItem.list[i].order + 1;
+      blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[i]);
+    }
+    item.order = index;
+    item.category = category;
+    blogApi.updateItem(USER_NAME, itemName, item);
+    categorizedItem.list.splice(index, 0, item);
+  };
+
   const handleDrag = (res) => {
     if(!res.destination) {
       return;
     }
     const { source, destination } = res;
-    // check if the previous list equals the destination list
-    // if the destination list is different from the previous list
-    if (source.droppableId !== destination.droppableId) {
-      const sourceColumn = categorizedItemList[source.droppableId];
-      const destColumn = categorizedItemList[destination.droppableId];
-      const sourceItems = [...sourceColumn.items];
-      const destItems = [...destColumn.items];
-      const [removed] = sourceItems.splice(source.index, 1);
-      destItems.splice(destination.index, 0, removed);
-      setCategorizedItemList({
-        ...categorizedItemList,
-        [source.droppableId]: {
-          ...sourceColumn,
-          items: sourceItems
-        },
-        [destination.droppableId]: {
-          ...destColumn,
-          items: destItems
-        }
-      });
-      handleDelete(source.droppableId, sourceColumn.items[source.index].id);
-      handleAppend(destination.droppableId, sourceColumn.items[source.index]);
-
-    } else {
-      const column = categorizedItemList[source.droppableId];
-      const copiedItems = [...column.items];
-      const [removed] = copiedItems.splice(source.index, 1);
-      copiedItems.splice(destination.index, 0, removed);
-      setCategorizedItemList({
-        ...categorizedItemList,
-        [source.droppableId]: {
-          ...column,
-          items: copiedItems
-        }
-      });
-    }
+    const item = removeItemFromSource(source.droppableId, source.index);
+    addItemToDest(destination.droppableId, destination.index, item);
   };
 
   const handleOpenDialog = (id, mode) => {
@@ -293,22 +136,56 @@ const GeneralRanking = (props) => {
     setDialogMode('');
   };
 
+  const handleAddRank = () => {
+    blogApi.setRankingCount(USER_NAME, itemName, rankingCount+1);
+  };
+
+  const handleRemoveRank = (category) => {
+    if(itemList[parseInt(category)].list.length > 0) {
+      // TODO create error modal
+      console.log('the removing rank has items!');
+      return;
+    }
+    for(let i = parseInt(category) + 1; i < rankingCount; i++) {
+      const categorizedItem = itemList[i];
+      for(let j = 0; j < categorizedItem.list.length; j++) {
+        categorizedItem.list[j].category = (parseInt(categorizedItem.list[j].category) - 1).toString();
+        blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[j]);
+      }
+    }
+    blogApi.setRankingCount(USER_NAME, itemName, rankingCount - 1);
+  };
+
   return (
     <div>
-      <h1>Watched {itemName} List</h1>
+      <div style={{ display: 'flex', flexDirection: 'row'}}>
+        <h1>Watched {itemName} List</h1>
+        <label htmlFor="icon-button-file">
+          <IconButton color="primary" aria-label="add rank" 
+            component="span" style={{ top: '10%'}} onClick={handleAddRank}>
+            <AddIcon fontSize="large"/>
+          </IconButton>
+        </label>
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }} >
         <DragDropContext onDragEnd={handleDrag} >
-          {Object.entries(categorizedItemList).map(([columnId, column]) => (
+          {itemList.map(categorizedList => (
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               // alignItems: 'center',
               overflow: 'auto'
             }}
-            key={columnId}>
-              <div style={{fontSize: 20}}>{column.name}</div>
+            key={categorizedList.category}>
+              <div style={{ display: 'flex', flexDirection: 'row'}}>
+                <div style={{fontSize: 20, marginTop: 'auto', marginBottom: 'auto'}}>{categorizedList.category}</div>
+                <IconButton color="primary" aria-label="remove rank" 
+                  component="span" onClick={() => handleRemoveRank(categorizedList.category)}>
+                  <RemoveIcon fontSize="small"/>
+                </IconButton>
+              </div>    
               <div style={{ margin: 8 }}>
-                <Droppable direction="horizontal" droppableId={columnId} key={columnId} >
+                <Droppable direction="horizontal" droppableId={categorizedList.category} key={categorizedList.category} >
                   { (provided, snapshot) => (
                     <div
                       {...provided.droppableProps}
@@ -327,7 +204,7 @@ const GeneralRanking = (props) => {
                         minHeight: 50
                       }}
                     >
-                      {column.items.map((item, index) => (
+                      {categorizedList.list.map((item, index) => (
                         
                         <Draggable
                           key={item.id}
@@ -386,7 +263,7 @@ const GeneralRanking = (props) => {
       </div>
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <List component="nav" style={{ maxHeight: 500, width: 400, overflow: 'auto'}}>
-          {itemList.map((item) => (
+          {rawItemList.map((item) => (
             <ListItem button key={item.id} style={{ background: openingDialogId === item.id 
               ? 'Cyan'
               : 'AliceBlue'}} 
@@ -400,11 +277,11 @@ const GeneralRanking = (props) => {
           <Button variant="contained" color="secondary" onClick={() => setDialogMode(DELETE_MODE)}>Delete</ Button>
         </div>
       </div>
-      {(dialogMode === EDIT_MODE && openingDialogId && itemList.find(o => o.id === openingDialogId)) && 
-        <DescriptionDialog dialogMode={EDIT_MODE} animeObj={itemList.find(o => o.id === openingDialogId)} 
+      {(dialogMode === EDIT_MODE && openingDialogId && rawItemList.find(o => o.id === openingDialogId)) && 
+        <DescriptionDialog dialogMode={EDIT_MODE} animeObj={rawItemList.find(o => o.id === openingDialogId)} 
           open={dialogMode === EDIT_MODE} onClose={handleCloseDialog} onSave={onItemInputUpdate}/>}
-      {(dialogMode === DELETE_MODE && openingDialogId && itemList.find(o => o.id === openingDialogId)) && 
-        <DescriptionDialog dialogMode={DELETE_MODE} animeObj={itemList.find(o => o.id === openingDialogId)} 
+      {(dialogMode === DELETE_MODE && openingDialogId && rawItemList.find(o => o.id === openingDialogId)) && 
+        <DescriptionDialog dialogMode={DELETE_MODE} animeObj={rawItemList.find(o => o.id === openingDialogId)} 
           open={dialogMode === DELETE_MODE} onClose={handleCloseDialog} onDelete={onItemDelete}/>}
     </div>
   );
