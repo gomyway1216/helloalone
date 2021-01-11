@@ -1,70 +1,65 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as blogApi from '../../Firebase/blog';
-import { TextField, Button, List, ListItem, ListItemText } from '@material-ui/core';
+import { Button, List, ListItem, ListItemText, Backdrop, CircularProgress } from '@material-ui/core';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import DescriptionDialog from '../DescriptionDialog';
 import * as rankingConstants from './constants';
 import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
+import AddNewItem from './AddNewItem';
 
 const VIEW_MODE = 'view_mode';
 const EDIT_MODE = 'edit_mode';
 const DELETE_MODE = 'delete_mode';
-const USER_NAME = 'yyaguchi';
 
 const GeneralRanking = (props) => {
   const { itemName } = props;
-  const [itemInput, setItemInput] = useState(rankingConstants.defaultInput);
   const [itemList, setItemList] = useState([]);
   const [rawItemList, setRawItemList] = useState([]);
   const [rankingCount, setRankingCount] = useState(0);
   const [openingDialogId, setOpenDialogId] = useState('');
   const [dialogMode, setDialogMode] = useState();
-
-  const onItemInputChange = e => {
-    setItemInput({
-      ...itemInput,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const onItemInputSave = () => {
-    blogApi.addItem(USER_NAME, itemName, itemInput)
-      .then(() => setItemInput(rankingConstants.defaultInput))
-      .catch(err => console.log(err));
-  };
+  const [loading, setLoading] = useState(false);
 
   const onItemInputUpdate = (item) => {
-    blogApi.updateItem(USER_NAME, itemName, item)
+    blogApi.updateItem(rankingConstants.USER_NAME, itemName, item)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
 
   const onItemDelete = () => {
-    blogApi.deleteItem(USER_NAME, itemName, openingDialogId)
+    blogApi.deleteItem(rankingConstants.USER_NAME, itemName, openingDialogId)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
 
+  const populateCategorizedList = () => {
+    const categorizedList = [];
+    for(let i = 0; i < rankingCount; i++) {
+      const categorizedItem = {
+        category: i.toString(),
+        list: []
+      };
+      categorizedList.push(categorizedItem);
+    }
+    return categorizedList;
+  };
+
   // TODO: find better way instead of creating list every time or prevent recreating non-modified list
   useEffect(() => {
-    blogApi.streamItemList(USER_NAME, itemName, {
+    console.log('useEffect call');
+    blogApi.streamItemList(rankingConstants.USER_NAME, itemName, {
       next: querySnapshot => {
+        setLoading(true);
         const updateItems = querySnapshot.docs.map(docSnapShot => (
           { id: docSnapShot.id, ...docSnapShot.data()}
         ));
+        // TODO: find a way to partially re-render the part using rawItem instead of entire component
         setRawItemList(updateItems);
-        const categorizedList = [];
-        for(let i = 0; i < rankingCount; i++) {
-          const categorizedItem = {
-            category: i.toString(),
-            list: []
-          };
-          categorizedList.push(categorizedItem);
-        }
-        updateItems.map(item => {
+        const categorizedList = populateCategorizedList();       
+        updateItems.forEach(item => {
           const categorizedItemArray = categorizedList.filter(e => e.category === item.category);
           if(categorizedItemArray.length > 0) {
             categorizedItemArray[0].list.push(item);
@@ -78,42 +73,50 @@ const GeneralRanking = (props) => {
             categorizedList.push(categorizedItem);
           }
         });
-
+        if(categorizedList.length !== rankingCount + 1) {
+          return;
+        }
         categorizedList.forEach(categorizedItem => categorizedItem.list.sort((a, b) => a.order - b.order));
         categorizedList.sort((a, b) => a.category - b.category);
         setItemList(categorizedList);
+        setLoading(false);
       },
-      error: () => console.log('error')
+      error: () => {
+        setLoading(false);
+        console.log('error');
+      }
     });
   }, [rankingCount]);
 
   useEffect(() => {
-    blogApi.streamRankCount(USER_NAME, itemName, (doc) => {
+    console.log('useEffect rankingCount');
+    blogApi.streamRankCount(rankingConstants.USER_NAME, itemName, (doc) => {
       if(doc && doc.exists && !isNaN(doc.data().rankingCount)) {
+        console.log('doc.data().rankingCount', doc.data().rankingCount);
         setRankingCount(doc.data().rankingCount);
       }
     });
-  }, [setRankingCount]);
+  }, []);
 
-  const removeItemFromSource = (category, index) => {
+  const removeItemFromSource = (category, index, batchItemList) => {
     const categorizedItem = itemList.filter(e => e.category === category)[0];
-    const [item] = categorizedItem.list.splice(index, 1);
+    const [item] = categorizedItem.list.splice(index, 1); 
     for(let i = index; i < categorizedItem.list.length; i++) {
       categorizedItem.list[i].order = categorizedItem.list[i].order - 1;
-      blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[i]);
+      batchItemList.push(categorizedItem.list[i]);
     }
     return item;
   };
 
-  const addItemToDest = (category, index, item) => {
+  const addItemToDest = (category, index, item, batchItemList) => {
     const categorizedItem = itemList.filter(e => e.category === category)[0];
     for(let i = index; i < categorizedItem.list.length; i++) {
       categorizedItem.list[i].order = categorizedItem.list[i].order + 1;
-      blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[i]);
+      batchItemList.push(categorizedItem.list[i]);
     }
     item.order = index;
     item.category = category;
-    blogApi.updateItem(USER_NAME, itemName, item);
+    batchItemList.push(item);
     categorizedItem.list.splice(index, 0, item);
   };
 
@@ -121,9 +124,12 @@ const GeneralRanking = (props) => {
     if(!res.destination) {
       return;
     }
+    setLoading(true);
     const { source, destination } = res;
-    const item = removeItemFromSource(source.droppableId, source.index);
-    addItemToDest(destination.droppableId, destination.index, item);
+    const batchItemList = [];
+    const item = removeItemFromSource(source.droppableId, source.index, batchItemList);
+    addItemToDest(destination.droppableId, destination.index, item, batchItemList);
+    blogApi.batchAccess(rankingConstants.USER_NAME, itemName, batchItemList, setLoading);
   };
 
   const handleOpenDialog = (id, mode) => {
@@ -137,7 +143,7 @@ const GeneralRanking = (props) => {
   };
 
   const handleAddRank = () => {
-    blogApi.setRankingCount(USER_NAME, itemName, rankingCount+1);
+    blogApi.setRankingCount(rankingConstants.USER_NAME, itemName, rankingCount+1);
   };
 
   const handleRemoveRank = (category) => {
@@ -150,14 +156,17 @@ const GeneralRanking = (props) => {
       const categorizedItem = itemList[i];
       for(let j = 0; j < categorizedItem.list.length; j++) {
         categorizedItem.list[j].category = (parseInt(categorizedItem.list[j].category) - 1).toString();
-        blogApi.updateItem(USER_NAME, itemName, categorizedItem.list[j]);
+        blogApi.updateItem(rankingConstants.USER_NAME, itemName, categorizedItem.list[j]);
       }
     }
-    blogApi.setRankingCount(USER_NAME, itemName, rankingCount - 1);
+    blogApi.setRankingCount(rankingConstants.USER_NAME, itemName, rankingCount - 1);
   };
 
   return (
     <div>
+      <Backdrop open={loading} >
+        <CircularProgress color="inherit" />
+      </Backdrop>
       <div style={{ display: 'flex', flexDirection: 'row'}}>
         <h1>Watched {itemName} List</h1>
         <label htmlFor="icon-button-file">
@@ -253,14 +262,7 @@ const GeneralRanking = (props) => {
           )}
         </DragDropContext>  
       </div>
-      <div>
-        <h1>Add {props.itemName}</h1>
-        <TextField id="title" name="title" label="Title" value={itemInput.title} onChange={onItemInputChange} />
-        <TextField id="description" name="description" multiline label="Description" 
-          value={itemInput.description} onChange={onItemInputChange} />
-        <TextField id="short" name="short" label="Short title" value={itemInput.short} onChange={onItemInputChange} />
-        <Button variant="contained" color="primary" onClick={onItemInputSave} >Save</ Button>
-      </div>
+      <AddNewItem itemName={props.itemName} />
       <div style={{ display: 'flex', flexDirection: 'row' }}>
         <List component="nav" style={{ maxHeight: 500, width: 400, overflow: 'auto'}}>
           {rawItemList.map((item) => (

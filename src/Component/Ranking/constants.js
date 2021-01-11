@@ -5,3 +5,5 @@ export const defaultInput = {
   category: 'unclassified',
   order: -1
 };
+
+export const USER_NAME = 'yyaguchi';

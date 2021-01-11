@@ -92,3 +92,11 @@ export const streamRankCount = (userName, itemName, observer) => {
     .onSnapshot(observer);
 };
 
+export const batchAccess = (userName, itemName, batchItemList, setLoading) => {
+  const updateCollectionRef = getDbAccess().collection(userName).doc(itemName).collection(itemName + 'List');
+  const batch = getDbAccess().batch();
+  batchItemList.forEach(batchItem => {
+    batch.update(updateCollectionRef.doc(batchItem.id), batchItem);
+  });
+  batch.commit().then(() => setLoading(false));
+};
