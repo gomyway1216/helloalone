@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar, Typography, IconButton, ListItem, List, ListItemText, Drawer } from '@material-ui/core/';
+import { AppBar, Toolbar, Typography, IconButton, ListItem, 
+  List, ListItemText, Drawer, MenuItem, Menu } from '@material-ui/core/';
 import MenuIcon from '@material-ui/icons/Menu';
+import AccountCircle from '@material-ui/icons/AccountCircle';
 import { useHistory } from 'react-router-dom';
+import { AuthContext } from '../Provider/AuthProvider';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -20,6 +23,17 @@ const ApplicationBar = () => {
   const classes = useStyles();
   const history = useHistory();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open = Boolean(anchorEl);
+  const { token, user, login, logout } = useContext(AuthContext);
+
+  const handleMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const toggleDrawer = (open) => e => {
     if (e.type === 'keydown' && (e.key === 'Tab' || e.key === 'Shift')) {
@@ -58,6 +72,37 @@ const ApplicationBar = () => {
           <Typography variant="h6" className={classes.title}>
             Hello Alone!
           </Typography>
+          <div>
+            <IconButton
+              aria-label="account of current user"
+              aria-controls="menu-appbar"
+              aria-haspopup="true"
+              onClick={handleMenu}
+              color="inherit"
+            >
+              <AccountCircle />
+            </IconButton>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={open}
+              onClose={handleClose}
+            >
+              {!token && <MenuItem onClick={login}>Log In</MenuItem>}
+              {token && <MenuItem >{user.userName ? user.userName : user.email.split('@')[0]}</MenuItem>}
+              {token && <MenuItem onClick={logout}>Logout</MenuItem>}
+              <MenuItem onClick={handleClose}>My account</MenuItem>
+            </Menu>
+          </div>
         </Toolbar>
       </AppBar>
       <Drawer open={drawerOpen} onClose={toggleDrawer(false)}>
