@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import * as blogApi from '../Firebase/blog';
-import { Button } from '@material-ui/core';
+import { Button, Card, CardContent } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import parse from 'html-react-parser';
+import './BlogListPage.scss';
 
 const Blog = ({ history }) => {
   const [blogList, setBlogList] = useState();
@@ -16,16 +18,26 @@ const Blog = ({ history }) => {
     getBlogIdList();
   }, []);
 
+  const useStyle = makeStyles({
+    root: {
+      margin: '8px'
+    }
+  });
+
   return (
-    <div>
+    <div className="blog-container">
       <h1>Blog List</h1>
       <Button color="primary" onClick={() => history.push('/create')}>Create Blog</Button>
       <Button color="primary" onClick={() => history.push('/blog')}>Blog</Button>
       {blogList && blogList.map(blog => 
-        <div key={blog.id}>
-          <div>{blog.id}</div>
-          {parse(blog.value)}
-        </div>
+        <Card key={blog.id} className="blog-card">
+          <CardContent>
+            <>
+              <div className="blog-title">{blog.id}</div>
+              <div className="blog-content">{parse(blog.value)}</div>
+            </>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

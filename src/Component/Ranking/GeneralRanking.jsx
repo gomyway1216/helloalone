@@ -1,296 +1,220 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import * as blogApi from '../../Firebase/blog';
-import { Button, List, ListItem, ListItemText, Backdrop, CircularProgress } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
-import DescriptionDialog from '../DescriptionDialog';
+import DescriptionDialog from '../Dialog/DescriptionDialog';
 import * as rankingConstants from './constants';
 import IconButton from '@material-ui/core/IconButton';
-import AddIcon from '@material-ui/icons/Add';
 import RemoveIcon from '@material-ui/icons/Remove';
-import AddNewItem from './AddNewItem';
-
-const VIEW_MODE = 'view_mode';
-const EDIT_MODE = 'edit_mode';
-const DELETE_MODE = 'delete_mode';
+import _ from 'lodash';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 
 const GeneralRanking = (props) => {
-  const { itemName } = props;
-  const [itemList, setItemList] = useState([]);
-  const [rawItemList, setRawItemList] = useState([]);
-  const [rankingCount, setRankingCount] = useState(0);
-  const [openingDialogId, setOpenDialogId] = useState('');
-  const [dialogMode, setDialogMode] = useState();
+  const { id, tags, rankingItemList, itemList } = props;
+  const [dialogItem, setDialogItem] = useState();
+  const [dialogRankingItemId, setDialogRankingItemId] = useState();
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
-  const onItemInputUpdate = (item) => {
-    blogApi.updateItem(rankingConstants.USER_NAME, itemName, item)
-      .then(() => handleCloseDialog())
-      .catch(err => console.log(err));
-  };
-
-  const onItemDelete = () => {
-    blogApi.deleteItem(rankingConstants.USER_NAME, itemName, openingDialogId)
-      .then(() => handleCloseDialog())
-      .catch(err => console.log(err));
-  };
-
-  const populateCategorizedList = () => {
-    const categorizedList = [];
-    for(let i = 0; i < rankingCount; i++) {
-      const categorizedItem = {
-        category: i.toString(),
-        list: []
-      };
-      categorizedList.push(categorizedItem);
-    }
-    return categorizedList;
-  };
-
-  // TODO: find better way instead of creating list every time or prevent recreating non-modified list
-  useEffect(() => {
-    console.log('useEffect call');
-    blogApi.streamItemList(rankingConstants.USER_NAME, itemName, {
-      next: querySnapshot => {
-        setLoading(true);
-        const updateItems = querySnapshot.docs.map(docSnapShot => (
-          { id: docSnapShot.id, ...docSnapShot.data()}
-        ));
-        // TODO: find a way to partially re-render the part using rawItem instead of entire component
-        setRawItemList(updateItems);
-        const categorizedList = populateCategorizedList();       
-        updateItems.forEach(item => {
-          const categorizedItemArray = categorizedList.filter(e => e.category === item.category);
-          if(categorizedItemArray.length > 0) {
-            categorizedItemArray[0].list.push(item);
-          } else {
-            const list = [];
-            list.push(item);
-            const categorizedItem = {
-              category: item.category,
-              list
-            };
-            categorizedList.push(categorizedItem);
-          }
-        });
-        if(categorizedList.length !== rankingCount + 1) {
-          return;
-        }
-        categorizedList.forEach(categorizedItem => categorizedItem.list.sort((a, b) => a.order - b.order));
-        categorizedList.sort((a, b) => a.category - b.category);
-        setItemList(categorizedList);
-        setLoading(false);
-      },
-      error: () => {
-        setLoading(false);
-        console.log('error');
-      }
-    });
-  }, [rankingCount]);
-
-  useEffect(() => {
-    console.log('useEffect rankingCount');
-    blogApi.streamRankCount(rankingConstants.USER_NAME, itemName, (doc) => {
-      if(doc && doc.exists && !isNaN(doc.data().rankingCount)) {
-        console.log('doc.data().rankingCount', doc.data().rankingCount);
-        setRankingCount(doc.data().rankingCount);
-      }
-    });
-  }, []);
-
-  const removeItemFromSource = (category, index, batchItemList) => {
-    const categorizedItem = itemList.filter(e => e.category === category)[0];
-    const [item] = categorizedItem.list.splice(index, 1); 
-    for(let i = index; i < categorizedItem.list.length; i++) {
-      categorizedItem.list[i].order = categorizedItem.list[i].order - 1;
-      batchItemList.push(categorizedItem.list[i]);
-    }
-    return item;
-  };
-
-  const addItemToDest = (category, index, item, batchItemList) => {
-    const categorizedItem = itemList.filter(e => e.category === category)[0];
-    for(let i = index; i < categorizedItem.list.length; i++) {
-      categorizedItem.list[i].order = categorizedItem.list[i].order + 1;
-      batchItemList.push(categorizedItem.list[i]);
-    }
-    item.order = index;
-    item.category = category;
-    batchItemList.push(item);
-    categorizedItem.list.splice(index, 0, item);
-  };
+  const [selectValue, setSelectValue] = useState({name: ''});
+  const [inputValue, setInputValue] = useState('');
 
   const handleDrag = (res) => {
+    // if the dragging item is in outside of any of the box
     if(!res.destination) {
       return;
     }
     setLoading(true);
     const { source, destination } = res;
-    const batchItemList = [];
-    const item = removeItemFromSource(source.droppableId, source.index, batchItemList);
-    addItemToDest(destination.droppableId, destination.index, item, batchItemList);
-    blogApi.batchAccess(rankingConstants.USER_NAME, itemName, batchItemList, setLoading);
+    const modifyingItemList = _.cloneDeep(rankingItemList);
+    const rankingItemSource = modifyingItemList.filter(e => e.id === source.droppableId)[0];
+    const [item] = rankingItemSource.itemList.splice(source.index, 1); 
+    const rankingItemDest = modifyingItemList.filter(e => e.id === destination.droppableId)[0];
+    rankingItemDest.itemList.splice(destination.index, 0, item);
+    blogApi.updateItemListBatch(rankingConstants.USER_NAME, id, [rankingItemSource, rankingItemDest], setLoading);
   };
 
-  const handleOpenDialog = (id, mode) => {
-    setOpenDialogId(id);
-    setDialogMode(mode);
+  const handleOpenDialog = (rankingItemId, item) => {
+    setDialogRankingItemId(rankingItemId);
+    setDialogItem(item);
+    setDialogOpen(true);
+  };
+
+  const onItemInputUpdate = (itemVal) => {
+    let tagIds = itemVal.tags.map(tag => tag.id);
+    const item = {...itemVal, tags: tagIds};
+    blogApi.updateItem(rankingConstants.USER_NAME, item)
+      .then(() => handleCloseDialog())
+      .catch(err => console.log(err));
   };
 
   const handleCloseDialog = () => {
-    setOpenDialogId('');
-    setDialogMode('');
+    setDialogOpen(false);
   };
 
-  const handleAddRank = () => {
-    blogApi.setRankingCount(rankingConstants.USER_NAME, itemName, rankingCount+1);
-  };
-
-  const handleRemoveRank = (category) => {
-    if(itemList[parseInt(category)].list.length > 0) {
+  const handleRemoveRank = (rank) => {
+    if(rankingItemList[rank-1].itemList.length > 0) {
       // TODO create error modal
-      console.log('the removing rank has items!');
       return;
     }
-    for(let i = parseInt(category) + 1; i < rankingCount; i++) {
-      const categorizedItem = itemList[i];
-      for(let j = 0; j < categorizedItem.list.length; j++) {
-        categorizedItem.list[j].category = (parseInt(categorizedItem.list[j].category) - 1).toString();
-        blogApi.updateItem(rankingConstants.USER_NAME, itemName, categorizedItem.list[j]);
-      }
+    const modifyingRankingItem = [];
+    for(let i = rank; i < rankingItemList.length; i++) {
+      rankingItemList[i].rank = rankingItemList[i].rank - 1;
+      modifyingRankingItem.push(rankingItemList[i]);
     }
-    blogApi.setRankingCount(rankingConstants.USER_NAME, itemName, rankingCount - 1);
+    // this won't get called if the removing list is at the end
+    if(modifyingRankingItem.length > 0) {
+      blogApi.updateItemListBatch(rankingConstants.USER_NAME, id, modifyingRankingItem, setLoading);
+    }
+    blogApi.deleteRankingItem(rankingConstants.USER_NAME, id, rankingItemList[rank-1].id);
+  };
+
+  const handleDeleteFromRanking = () => {
+    blogApi.deleteItemFromRanking(rankingConstants.USER_NAME, id, dialogRankingItemId, dialogItem.id)
+      .then(() => handleCloseDialog());
+  };
+
+  const addItemToRanking = () => {
+    if(!selectValue) {
+      return;
+    }
+    const rankingItemId = rankingItemList[rankingItemList.length-1];
+    const AddingItemExistException = {message: 'Adding item already exists!'};
+    try {
+      rankingItemList.forEach(rankingItem => {
+        rankingItem.itemList.forEach(item => {
+          if(item.id === selectValue.id) {
+            throw AddingItemExistException;
+          }
+        });
+      });
+    } catch(e) {
+      console.log(e.message);
+      return;
+    }
+    blogApi.addItemToRanking(rankingConstants.USER_NAME, id, rankingItemId.id, selectValue.id)
+      .then(setSelectValue(null));
+    // TODO create modal 
   };
 
   return (
-    <div>
-      <Backdrop open={loading} >
-        <CircularProgress color="inherit" />
-      </Backdrop>
-      <div style={{ display: 'flex', flexDirection: 'row'}}>
-        <h1>Watched {itemName} List</h1>
-        <label htmlFor="icon-button-file">
-          <IconButton color="primary" aria-label="add rank" 
-            component="span" style={{ top: '10%'}} onClick={handleAddRank}>
-            <AddIcon fontSize="large"/>
-          </IconButton>
-        </label>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', height: '100%' }} >
+    <>
+      <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center'}} >
         <DragDropContext onDragEnd={handleDrag} >
-          {itemList.map(categorizedList => (
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              // alignItems: 'center',
-              overflow: 'auto'
-            }}
-            key={categorizedList.category}>
-              <div style={{ display: 'flex', flexDirection: 'row'}}>
-                <div style={{fontSize: 20, marginTop: 'auto', marginBottom: 'auto'}}>{categorizedList.category}</div>
-                <IconButton color="primary" aria-label="remove rank" 
-                  component="span" onClick={() => handleRemoveRank(categorizedList.category)}>
-                  <RemoveIcon fontSize="small"/>
-                </IconButton>
-              </div>    
-              <div style={{ margin: 8 }}>
-                <Droppable direction="horizontal" droppableId={categorizedList.category} key={categorizedList.category} >
-                  { (provided, snapshot) => (
-                    <div
-                      {...provided.droppableProps}
-                      ref={provided.innerRef}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        // overflow: 'auto',
-                        flexWrap: 'wrap',
-                        background: snapshot.isDraggingOver
-                          ? 'lightblue'
-                          : 'LavenderBlush',
-                        padding: 4,
-                        // width: 250,
-                        minWidth: 200,
-                        minHeight: 50
-                      }}
-                    >
-                      {categorizedList.list.map((item, index) => (
-                        
-                        <Draggable
-                          key={item.id}
-                          draggableId={item.id}
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <>
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                style={{
-                                  userSelect: 'none',
-                                  padding: 8,
-                                  margin: '0 0 8px 0',
-                                  // minHeight: '10px',
-                                  backgroundColor: snapshot.isDragging
-                                    ? 'LawnGreen'
-                                    : 'FloralWhite',
-                                  color: 'blue',
-                                  ...provided.draggableProps.style,
-                                  borderStyle: 'solid',
-                                  borderColor: 'Lavender',
-                                  borderRadius: 25
-                                }}
-                                onClick={() => handleOpenDialog(item.id, VIEW_MODE)}
-                              >
-                                {item.title}
-                              </div>
-                              <DescriptionDialog id={item.id} dialogMode={VIEW_MODE} 
-                                open={openingDialogId === item.id && dialogMode === VIEW_MODE} 
-                                animeObj={item} onClose={handleCloseDialog} />
-                            </>
-                          )}
-                        </Draggable>
-                      )
-                      )}
-                      {provided.placeholder}  
-                    </div>
-                  )}
-                </Droppable>
+          {rankingItemList.map((rankingItem, index) => {
+            return (
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'auto'
+              }}
+              key={rankingItem.id}>
+                <div style={{ display: 'flex', flexDirection: 'row'}}>
+                  <div style={{fontSize: 20, marginTop: 'auto', marginBottom: 'auto'}}>{rankingItem.rank}</div>
+                  <IconButton color="primary" aria-label="remove rank" 
+                    component="span" onClick={() => handleRemoveRank(rankingItem.rank)}>
+                    <RemoveIcon fontSize="small"/>
+                  </IconButton>
+                </div> 
+                <div style={{ margin: 8 }}>
+                  <Droppable direction="horizontal" droppableId={rankingItem.id} key={rankingItem.id} >
+                    {(provided, snapshot) => (
+                      <div
+                        {...provided.droppableProps}
+                        ref={provided.innerRef}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'row',
+                          flexWrap: 'wrap',
+                          background: snapshot.isDraggingOver
+                            ? 'lightblue'
+                            : 'LavenderBlush',
+                          padding: 4,
+                          minWidth: 200,
+                          minHeight: 50
+                        }}
+                      >
+                        {rankingItem.itemList.map((item, index) => {                        
+                          return (      
+                            <Draggable
+                              key={item.id}
+                              draggableId={item.id}
+                              index={index}
+                            >
+                              {(provided, snapshot) => (
+                                <>
+                                  <div
+                                    ref={provided.innerRef}
+                                    {...provided.draggableProps}
+                                    {...provided.dragHandleProps}
+                                    style={{
+                                      userSelect: 'none',
+                                      padding: 8,
+                                      margin: '0 0 8px 0',
+                                      backgroundColor: snapshot.isDragging
+                                        ? 'LawnGreen'
+                                        : 'FloralWhite',
+                                      color: 'blue',
+                                      ...provided.draggableProps.style,
+                                      borderStyle: 'solid',
+                                      borderColor: 'Lavender',
+                                      borderRadius: 25
+                                    }}
+                                    onClick={() => handleOpenDialog(rankingItem.id, item)}
+                                  >
+                                    {item.name}
+                                  </div>
+                                </>
+                              )}
+                            </Draggable>
+                          );                          
+                        }
+                        )}
+                        {provided.placeholder}  
+                      </div>
+                    )}
+                  </Droppable>
+                </div>               
               </div>
-            </div>
-          )
-          )}
+            );
+          })}
         </DragDropContext>  
-      </div>
-      <AddNewItem itemName={props.itemName} />
-      <div style={{ display: 'flex', flexDirection: 'row' }}>
-        <List component="nav" style={{ maxHeight: 500, width: 400, overflow: 'auto'}}>
-          {rawItemList.map((item) => (
-            <ListItem button key={item.id} style={{ background: openingDialogId === item.id 
-              ? 'Cyan'
-              : 'AliceBlue'}} 
-            onClick={() => setOpenDialogId(item.id)}>
-              <ListItemText primary={item.title} />
-            </ListItem>
-          ))}
-        </List>
-        <div style={{margin: 30}}>
-          <Button variant="contained" color="primary" onClick={() => setDialogMode(EDIT_MODE)} style={{margin: 20}}>Edit</ Button>
-          <Button variant="contained" color="secondary" onClick={() => setDialogMode(DELETE_MODE)}>Delete</ Button>
+        <div style={{ display: 'flex', flexDirection: 'row'}}>
+          <Autocomplete
+            value={selectValue}
+            onChange={(selectValue, newValue) => {
+              setSelectValue(newValue);
+            }}
+            inputValue={inputValue}
+            onInputChange={(event, newInputValue) => {
+              setInputValue(newInputValue);
+            }}
+            id="itemList"
+            options={itemList}
+            style={{ width: 300 }}
+            getOptionLabel={(option) => option.name}
+            renderInput={(params) => <TextField {...params} label="Item Name" variant="outlined" />}
+          />
+          <Button variant="contained" color="primary" onClick={addItemToRanking}>
+            Add
+          </Button>
         </div>
       </div>
-      {(dialogMode === EDIT_MODE && openingDialogId && rawItemList.find(o => o.id === openingDialogId)) && 
-        <DescriptionDialog dialogMode={EDIT_MODE} animeObj={rawItemList.find(o => o.id === openingDialogId)} 
-          open={dialogMode === EDIT_MODE} onClose={handleCloseDialog} onSave={onItemInputUpdate}/>}
-      {(dialogMode === DELETE_MODE && openingDialogId && rawItemList.find(o => o.id === openingDialogId)) && 
-        <DescriptionDialog dialogMode={DELETE_MODE} animeObj={rawItemList.find(o => o.id === openingDialogId)} 
-          open={dialogMode === DELETE_MODE} onClose={handleCloseDialog} onDelete={onItemDelete}/>}
-    </div>
+      {dialogOpen && 
+        <DescriptionDialog 
+          open={dialogOpen} item={dialogItem} onClose={handleCloseDialog} tags={tags} 
+          onSave={onItemInputUpdate} partOfRanking={true} onDeleteFromRanking={handleDeleteFromRanking}     
+        />
+      }
+    </>
   );
 };
 
 export default GeneralRanking;
 
 GeneralRanking.propTypes = {
-  itemName: PropTypes.string.isRequired,
+  id: PropTypes.string.isRequired,
+  tags: PropTypes.array.isRequired,
+  rankingItemList: PropTypes.array.isRequired,
+  itemList: PropTypes.array.isRequired
 };

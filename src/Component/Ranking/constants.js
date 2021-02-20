@@ -1,9 +1,8 @@
 export const defaultInput = {
-  title: '',
+  name: '',
   description: '',
   short: '',
-  category: 'unclassified',
-  order: -1
+  tags: []
 };
 
 export const USER_NAME = 'yyaguchi';
