@@ -50,13 +50,13 @@ const ApplicationBar = () => {
       onKeyDown={toggleDrawer(false)}
     >
       <List>
-        <ListItem button key={'Blog'} onClick={() => history.push('blog')} >
+        <ListItem button key={'Blog'} onClick={() => history.push('/blog')} >
           <ListItemText primary={'Blog'} />
         </ListItem>
-        <ListItem button key={'Ranking'} onClick={() => history.push('ranking')} >
+        <ListItem button key={'Ranking'} onClick={() => history.push('/ranking')} >
           <ListItemText primary={'Ranking'} />
         </ListItem>
-        <ListItem button key={'Create Blog'} onClick={() => history.push('create')} >
+        <ListItem button key={'Create Blog'} onClick={() => history.push('/create')} >
           <ListItemText primary={'Create Blog'} />
         </ListItem>
       </List>

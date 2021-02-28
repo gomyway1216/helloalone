@@ -6,9 +6,12 @@ import * as blogApi from '../Firebase/blog';
 import { Button, TextField } from '@material-ui/core';
 import parse from 'html-react-parser';
 
+const USER_NAME = 'yyaguchi';
+
 const CreateBlog = ({ history }) => {
-  const [title, setTitle] = useState('');
+  const [name, setName] = useState('');
   const [body, setBody] = useState('');
+  const [file, setFile] = useState();
 
   const modules = {
     toolbar: [
@@ -23,21 +26,32 @@ const CreateBlog = ({ history }) => {
     ]
   };
 
-  const onSave = () => {
+  const onSave = async () => {
+    if(!name || !body || !file) {
+      console.log('please provide the values');
+      return;
+    }
+    const downloadURL = await blogApi.getStorageRef(file);
     const value = {
-      title: title,
-      body: body
+      user: USER_NAME,
+      name: name,
+      body: body,
+      mainImage: downloadURL
     };
-    blogApi.addBlog(value)
+    blogApi.addBlog(USER_NAME, value)
       .then(() => {
-        setTitle('');
-        setBody('');
+        window.location.reload();
       })
       .catch(err => console.log(err));
   };
 
-  const handleTitleChange = (e) => {
-    setTitle(e.target.value);
+  const handleNameChange = (e) => {
+    setName(e.target.value);
+  };
+
+  const onFileChange = async (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
   };
 
   const formats = [
@@ -52,16 +66,33 @@ const CreateBlog = ({ history }) => {
   return (
     <div>
       <h1>Create blog</h1>
-      <TextField id="standard-basic" label="Title" value={title} onChange={handleTitleChange}/>
+      <div>
+        <div style={{ fontSize: 'x-large' }}>Please upload the main image</div>
+        <input
+          accept="image/*"
+          id="contained-button-file"
+          multiple
+          type="file"
+          onChange={onFileChange}
+        />
+        <label htmlFor="contained-button-file">
+          <Button variant="contained" component="span">
+          Upload
+          </Button>
+        </label>
+      </div>
+      <TextField id="standard-basic" label="Name" value={name} onChange={handleNameChange}/>
       <ReactQuill theme="snow"
         modules={modules} formats={formats} 
         value={body} onChange={setBody}/>
-      <div>
-        <Button variant="contained" color="primary" onClick={onSave}>Save</Button>
+      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
         <Button variant="contained" onClick={() => history.push('/')}>Close</Button>
+        <Button variant="contained" color="primary" onClick={onSave}>Save</Button>     
       </div>
-      {/* <div dangerouslySetInnerHTML={{__html: body}}></div> */}
-      {parse(body)}
+      <div>
+        <div style={{ fontSize: 'x-large' }}>Preview</div>
+        {parse(body)}
+      </div>
     </div>
   );
 };

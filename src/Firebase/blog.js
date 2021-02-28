@@ -2,6 +2,7 @@ import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
 import * as fbConnect from './firebaseConnect';
+import 'firebase/storage';
 
 export const authenticateAnonymously = () => {
   return firebase.auth().signInAnonymously();
@@ -36,22 +37,33 @@ export const getDbAccess = () => {
   return fbConnect.exportDbAccess();
 };
 
-export const addBlog = (value) => {
-  return getDbAccess().collection('blog').doc(value.title).set(value);
+export const addBlog = (userName, value) => {
+  const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+  value.timestamp = timestamp;
+  return getDbAccess().collection(userName).doc('blog').collection('blogCollection')
+    .add(value);
 };
 
-export const getBlogListId = () => {
-  return getDbAccess().collection('blog').get().then((querySnapshot) => {
-    const list = [];
-    querySnapshot.forEach((doc) => {
-      const element = {
-        id: doc.id,
-        value: doc.data().body
-      };
-      list.push(element);
+export const getBlogList = (userName) => {
+  return getDbAccess().collection(userName).doc('blog').collection('blogCollection')
+    .get().then((querySnapshot) => {
+      const list = [];
+      querySnapshot.forEach((doc) => {
+        const element = {
+          id: doc.id,
+          value: doc.data()
+        };
+        list.push(element);
+      });
+      return list;
     });
-    return list;
-  });
+};
+
+export const getBlog = (userName, id) => {
+  return getDbAccess().collection(userName).doc('blog').collection('blogCollection').doc(id)
+    .get().then(doc => {
+      return doc.data();
+    });
 };
 
 export const addItem = (userName, item) => {
@@ -261,4 +273,12 @@ export const deleteRanking = (userName, rankingId) => {
         } 
       }
     );
+};
+
+export const getStorageRef = async (file) => {
+  const storageRef = fbConnect.exportStorageAccess().ref();
+  const fileRef = storageRef.child(file.name);
+  await fileRef.put(file);
+  const downloadURL = await fileRef.getDownloadURL();
+  return downloadURL;
 };
