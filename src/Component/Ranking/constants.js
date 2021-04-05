@@ -4,5 +4,3 @@ export const defaultInput = {
   short: '',
   tags: []
 };
-
-export const USER_NAME = 'yyaguchi';

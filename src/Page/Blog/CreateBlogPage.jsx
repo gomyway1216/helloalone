@@ -2,16 +2,17 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import * as blogApi from '../Firebase/blog';
+import * as blogApi from '../../Firebase/blog';
 import { Button, TextField } from '@material-ui/core';
 import parse from 'html-react-parser';
-
-const USER_NAME = 'yyaguchi';
+import { useAuth } from '../../Provider/AuthProvider';
 
 const CreateBlog = ({ history }) => {
   const [name, setName] = useState('');
   const [body, setBody] = useState('');
   const [file, setFile] = useState();
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
 
   const modules = {
     toolbar: [
@@ -33,12 +34,12 @@ const CreateBlog = ({ history }) => {
     }
     const downloadURL = await blogApi.getStorageRef(file);
     const value = {
-      user: USER_NAME,
+      user: userId,
       name: name,
       body: body,
       mainImage: downloadURL
     };
-    blogApi.addBlog(USER_NAME, value)
+    blogApi.addBlog(userId, value)
       .then(() => {
         window.location.reload();
       })

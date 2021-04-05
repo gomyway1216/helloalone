@@ -1,11 +1,12 @@
-import React, { useState, useContext } from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, IconButton, ListItem, 
   List, ListItemText, Drawer, MenuItem, Menu } from '@material-ui/core/';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { useHistory } from 'react-router-dom';
-import { AuthContext } from '../Provider/AuthProvider';
+import { useAuth } from '../Provider/AuthProvider';
+import { Alert, AlertTitle } from '@material-ui/lab';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -26,7 +27,23 @@ const ApplicationBar = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
-  const { token, user, login, logout } = useContext(AuthContext);
+  const [error, setError] = useState('');
+  const { currentUser, signOut } = useAuth();
+
+  const handleSignOut = async () => {
+    setError('');
+    try {
+      await signOut();
+      setAnchorEl(null);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const handleSignIn = () => {
+    history.push('/signin');
+    setAnchorEl(null);
+  };
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -34,6 +51,10 @@ const ApplicationBar = () => {
 
   const handleClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleMyAccount = () => {
+    history.push('/mypage');
   };
 
   const toggleDrawer = (open) => e => {
@@ -58,6 +79,12 @@ const ApplicationBar = () => {
         </ListItem>
         <ListItem button key={'Create Blog'} onClick={() => history.push('/create')} >
           <ListItemText primary={'Create Blog'} />
+        </ListItem>
+        <ListItem button key={'Task List'} onClick={() => history.push('/task')} >
+          <ListItemText primary={'Task List'} />
+        </ListItem>
+        <ListItem button key={'Chat'} onClick={() => history.push('/chat')} >
+          <ListItemText primary={'Chat'} />
         </ListItem>
       </List>
     </div>
@@ -98,11 +125,17 @@ const ApplicationBar = () => {
               open={open}
               onClose={handleClose}
             >
-              {!token && <MenuItem onClick={login}>Log In</MenuItem>}
-              {token && <MenuItem >{user.userName ? user.userName : user.email.split('@')[0]}</MenuItem>}
-              {token && <MenuItem onClick={logout}>Logout</MenuItem>}
-              <MenuItem onClick={handleClose}>My account</MenuItem>
+              {!currentUser && <MenuItem onClick={handleSignIn}>Sign In</MenuItem>}
+              {currentUser && <MenuItem >{currentUser.userName ? currentUser.userName : currentUser.email.split('@')[0]}</MenuItem>}
+              {currentUser && <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>}
+              {currentUser && <MenuItem onClick={handleMyAccount}>My Page</MenuItem>}
             </Menu>
+            {error && 
+              <Alert severity="error">
+                <AlertTitle>Error</AlertTitle>
+                {error}
+              </Alert>
+            }
           </div>
         </Toolbar>
       </AppBar>

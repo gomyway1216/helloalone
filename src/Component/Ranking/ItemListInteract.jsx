@@ -6,6 +6,7 @@ import * as rankingConstants from './constants';
 import DescriptionDialog from '../Dialog/DescriptionDialog';
 import DeleteDialog from '../Dialog/DeleteDialog';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { useAuth } from '../../Provider/AuthProvider';
 
 const EDIT_MODE = 'edit_mode';
 const DELETE_MODE = 'delete_mode';
@@ -17,9 +18,11 @@ const ItemListInteract = (props) => {
   const [loading, setLoading] = useState();
   const [openingDialogItem, setOpenDialogItem] = useState();
   const [dialogMode, setDialogMode] = useState();
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
 
   useEffect(() => {
-    blogApi.streamItemList(rankingConstants.USER_NAME, 'itemCollection', {
+    blogApi.streamItemList(userId, 'itemCollection', {
       next: querySnapshot => {
         setLoading(true);
         const updateItems = querySnapshot.docs.map(docSnapShot => (
@@ -38,7 +41,7 @@ const ItemListInteract = (props) => {
     }
     const tagIds = itemInput.tags.map(tag => tag.id);
     const item = {...itemInput, tags: tagIds};
-    blogApi.addItem(rankingConstants.USER_NAME, item)
+    blogApi.addItem(userId, item)
       .then(() => {
         setItemInput(rankingConstants.defaultInput);
         
@@ -63,13 +66,13 @@ const ItemListInteract = (props) => {
   const onItemInputUpdate = (itemVal) => {
     let tagIds = itemVal.tags.map(tag => tag.id);
     const item = {...itemVal, tags: tagIds};
-    blogApi.updateItem(rankingConstants.USER_NAME, item)
+    blogApi.updateItem(userId, item)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
 
   const onItemDelete = () => {
-    blogApi.deleteItem(rankingConstants.USER_NAME, openingDialogItem.id, handleCloseDialog);
+    blogApi.deleteItem(userId, openingDialogItem.id, handleCloseDialog);
   };
 
   const handleCloseDialog = () => {

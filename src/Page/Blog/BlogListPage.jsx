@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
-import * as blogApi from '../Firebase/blog';
+import * as blogApi from '../../Firebase/blog';
+import CustomCard from '../../Component/Blog/CustomCard';
 import './BlogListPage.scss';
-import CustomCard from '../Component/Blog/CustomCard';
-
-const USER_NAME = 'yyaguchi';
 
 const Blog = () => {
   const [blogList, setBlogList] = useState();
 
+
   const getBlogIdList = async () => {
-    const result = await blogApi.getBlogList(USER_NAME);
+    const result = await blogApi.getBlogList(process.env.REACT_APP_DEFAULT_BLOG_USER);
     setBlogList(result);
   };
 
@@ -32,7 +30,3 @@ const Blog = () => {
 };
 
 export default Blog;
-
-Blog.propTypes = {
-  history: PropTypes.object
-};

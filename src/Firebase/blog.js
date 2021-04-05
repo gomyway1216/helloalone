@@ -106,7 +106,7 @@ export const deleteItem = (userName, id, callback) => {
   getDbAccess().collection(userName).doc('ranking').get().then(
     doc => {
       if(!doc.exists) {
-        console.log('the document in the map doesn\'t exist');
+        console.log('the document doesn\'t exist');
       } else {
         const rankingMap = doc.data().rankingMap;
         Object.keys(rankingMap).map(key => {
@@ -209,7 +209,12 @@ export const createRanking = async (userName, itemName) => {
   await docRef.get().then(
     doc => {
       if(!doc.exists) {
-        console.log('the document in the map doesn\'t exist');
+        console.log('the document doesn\'t exist');
+        let rankingMap = {};
+        rankingMap[itemName] = itemName;
+        getDbAccess().collection(userName).doc('ranking').set({
+          rankingMap
+        });
       } else {
         const rankingMap = doc.data().rankingMap;
         rankingMap[itemName] = itemName;

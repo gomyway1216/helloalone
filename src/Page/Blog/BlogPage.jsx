@@ -1,19 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import 'react-quill/dist/quill.snow.css';
-import * as blogApi from '../Firebase/blog';
+import * as blogApi from '../../Firebase/blog';
 import parse from 'html-react-parser';
-import { useParams} from 'react-router-dom';
-import * as util from '../util/util';
+import { useParams } from 'react-router-dom';
+import * as util from '../../util/util';
 import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
-
-const USER_NAME = 'yyaguchi';
 
 const BlogPage = () => {
   const [blog, setBlog] = useState();
   const {id} = useParams();
 
   useEffect(() => {
-    blogApi.getBlog(USER_NAME, id)
+    blogApi.getBlog(process.env.REACT_APP_DEFAULT_BLOG_USER, id)
       .then(doc => setBlog(doc));
   }, []);
 

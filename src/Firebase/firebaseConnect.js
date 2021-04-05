@@ -30,3 +30,5 @@ export const exportDbAccess = () => {
 export const exportStorageAccess = () => {
   return firebase.storage();
 };
+
+export const auth = firebase.auth();

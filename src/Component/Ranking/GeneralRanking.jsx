@@ -4,11 +4,11 @@ import * as blogApi from '../../Firebase/blog';
 import { Button, TextField } from '@material-ui/core';
 import { DragDropContext, Draggable, Droppable } from 'react-beautiful-dnd';
 import DescriptionDialog from '../Dialog/DescriptionDialog';
-import * as rankingConstants from './constants';
 import IconButton from '@material-ui/core/IconButton';
 import RemoveIcon from '@material-ui/icons/Remove';
 import _ from 'lodash';
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { useAuth } from '../../Provider/AuthProvider';
 
 const GeneralRanking = (props) => {
   const { id, tags, rankingItemList, itemList } = props;
@@ -18,6 +18,8 @@ const GeneralRanking = (props) => {
   const [loading, setLoading] = useState(false);
   const [selectValue, setSelectValue] = useState({name: ''});
   const [inputValue, setInputValue] = useState('');
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
 
   const handleDrag = (res) => {
     // if the dragging item is in outside of any of the box
@@ -31,7 +33,7 @@ const GeneralRanking = (props) => {
     const [item] = rankingItemSource.itemList.splice(source.index, 1); 
     const rankingItemDest = modifyingItemList.filter(e => e.id === destination.droppableId)[0];
     rankingItemDest.itemList.splice(destination.index, 0, item);
-    blogApi.updateItemListBatch(rankingConstants.USER_NAME, id, [rankingItemSource, rankingItemDest], setLoading);
+    blogApi.updateItemListBatch(userId, id, [rankingItemSource, rankingItemDest], setLoading);
   };
 
   const handleOpenDialog = (rankingItemId, item) => {
@@ -43,7 +45,7 @@ const GeneralRanking = (props) => {
   const onItemInputUpdate = (itemVal) => {
     let tagIds = itemVal.tags.map(tag => tag.id);
     const item = {...itemVal, tags: tagIds};
-    blogApi.updateItem(rankingConstants.USER_NAME, item)
+    blogApi.updateItem(userId, item)
       .then(() => handleCloseDialog())
       .catch(err => console.log(err));
   };
@@ -64,13 +66,13 @@ const GeneralRanking = (props) => {
     }
     // this won't get called if the removing list is at the end
     if(modifyingRankingItem.length > 0) {
-      blogApi.updateItemListBatch(rankingConstants.USER_NAME, id, modifyingRankingItem, setLoading);
+      blogApi.updateItemListBatch(userId, id, modifyingRankingItem, setLoading);
     }
-    blogApi.deleteRankingItem(rankingConstants.USER_NAME, id, rankingItemList[rank-1].id);
+    blogApi.deleteRankingItem(userId, id, rankingItemList[rank-1].id);
   };
 
   const handleDeleteFromRanking = () => {
-    blogApi.deleteItemFromRanking(rankingConstants.USER_NAME, id, dialogRankingItemId, dialogItem.id)
+    blogApi.deleteItemFromRanking(userId, id, dialogRankingItemId, dialogItem.id)
       .then(() => handleCloseDialog());
   };
 
@@ -92,7 +94,7 @@ const GeneralRanking = (props) => {
       console.log(e.message);
       return;
     }
-    blogApi.addItemToRanking(rankingConstants.USER_NAME, id, rankingItemId.id, selectValue.id)
+    blogApi.addItemToRanking(userId, id, rankingItemId.id, selectValue.id)
       .then(setSelectValue(null));
     // TODO create modal 
   };
