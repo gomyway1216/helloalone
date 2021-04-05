@@ -104,3 +104,18 @@ export const streamChats = (id, chatPassword, pageSize, observer, pageNumber) =>
       }
     });
 };
+
+export const createChatGroup = (name, isPasswordRequired, password, description) => {
+  return getDbAccess().collection('chat').add({
+    name,
+    isPasswordRequired,
+    password,
+    description
+  });
+};
+
+export const checkPasswordRequired = async (id) => {
+  const doc = await getDbAccess().collection('chat').doc(id).get();
+  console.log(doc.data());
+  return doc.data().isPasswordRequired;
+};

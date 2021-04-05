@@ -4,17 +4,31 @@ import * as chatApi from '../../Firebase/chat';
 import { useParams } from 'react-router-dom';
 import * as util from '../../util/util';
 import { useInView } from 'react-intersection-observer';
-import { CircularProgress } from '@material-ui/core';
+import { useHistory } from 'react-router-dom';
+import EnterChatGroupDialog from '../../Component/Dialog/EnterChatGroupDialog';
+import { TextField, CircularProgress, Button } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import './chatPage.scss';
 
+const useStyles = makeStyles((theme) => ({
+  root: {
+    '& .MuiTextField-root': {
+      margin: theme.spacing(1),
+      width: '75%',
+    },
+  },
+}));
+
 const Chat = () => {
+  const classes = useStyles();
   const { id } = useParams();
   const { currentUser } = useAuth();
+  let history = useHistory();
   const [chats, setChats] = useState([]);
   const [content, setContent] = useState('');
   const [writeError, setWriteError] = useState();
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState('12345');
+  const [password, setPassword] = useState();
   const [viewChangeCounter, setViewChangeCounter] = useState(0);
   const topRef2 = useRef();
   const bottomRef2 = useRef();
@@ -22,6 +36,7 @@ const Chat = () => {
   const [oldMessageSize, setOldMessageSize] = useState(PAGE_SIZE);
   const stateRef = useRef();
   stateRef.current = chats;
+  const [dialogOpen, setDialogOpen] = useState(true);
 
   const { ref: topRef, inView } = useInView({
     /* Optional options */
@@ -36,7 +51,15 @@ const Chat = () => {
   const bottomViewRef = useRef();
   bottomViewRef.current = bottomInView;
 
+  useEffect(() => {
+    checkPasswordRequired();
+  }, []);
+
   useEffect(() => {  
+    if(!password) {
+      return;
+    }
+
     chatApi.streamChats(id, password, PAGE_SIZE, {
       next: querySnapshot => {
         let isMessageFromOwn = false;
@@ -71,7 +94,7 @@ const Chat = () => {
         setLoading(false);
       }
     });
-  }, []);
+  }, [password]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -117,8 +140,34 @@ const Chat = () => {
     }
   }, [inView]);
 
+  const handleDialogClose = () => {
+    setDialogOpen(false); // needed?
+    history.push('/chat');
+  };
+
+  const enterGroupPassword = async (password) => {
+    const access = await chatApi.checkChatGroupAccess(id, password);
+    if(access) {
+      setPassword(password);
+    } else {
+      return 'Password is wrong.';
+    }
+  };
+
+  const checkPasswordRequired = async () => {
+    const isPasswordRequired = await chatApi.checkPasswordRequired(id);
+    if(!isPasswordRequired) {
+      setPassword('password not required');
+    }
+    return isPasswordRequired;
+  };
+
+  if(!password) {
+    return <EnterChatGroupDialog open={dialogOpen} onClose={handleDialogClose} onSave={enterGroupPassword} />;
+  }
+
   return(
-    <div>
+    <div className={classes.root}>
       <div className="chat-area">
         <div ref={topRef}></div>
         <div className="loading-icon">
@@ -149,10 +198,20 @@ const Chat = () => {
           </p>
         }
       </div>
-      <form onSubmit={handleSubmit} className="mx-3">
-        <textarea className="form-control" name="content" onChange={handleChatContentChange} value={content}></textarea>
-        {writeError ? <p className="text-danger">{writeError}</p> : null}
-        <button type="submit" className="btn btn-submit px-5 mt-4">Send</button>
+      <form onSubmit={handleSubmit}>
+        <div className='message-group'>
+          <TextField
+            id="message-textfield"
+            label="Multiline"
+            multiline
+            fullWidth
+            rowsMax={4}
+            value={content}
+            onChange={handleChatContentChange}
+          />
+          <Button variant="contained" color="primary" type='submit'>Send</Button>
+        </div>
+        {writeError ? <p>{writeError}</p> : null}
       </form>
       <div className="py-5 mx-3">
           Login in as: <strong className="text-info">{currentUser.uid}</strong>
