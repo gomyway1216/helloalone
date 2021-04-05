@@ -8,7 +8,7 @@ import shave from 'shave';
 
 const CustomCard = (props) => {
   const { blog } = props;
-  let history = useHistory();
+  const history = useHistory();
 
   useEffect(() => {
     shave('.textInitial', 48);

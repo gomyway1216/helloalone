@@ -116,6 +116,5 @@ export const createChatGroup = (name, isPasswordRequired, password, description)
 
 export const checkPasswordRequired = async (id) => {
   const doc = await getDbAccess().collection('chat').doc(id).get();
-  console.log(doc.data());
   return doc.data().isPasswordRequired;
 };

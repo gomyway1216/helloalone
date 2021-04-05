@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { TextField, Button, Dialog, DialogTitle, DialogActions } from '@material-ui/core';
+import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions } from '@material-ui/core';
 
 const EditRankingNameDialog = (props) => {
   const [open, setOpen] = useState(props.open);
@@ -26,7 +26,9 @@ const EditRankingNameDialog = (props) => {
         aria-describedby="alert-dialog-description"
       >
         <DialogTitle id="name">Create New Ranking</DialogTitle>
-        <TextField id="name" name="name" label="Name" value={itemInput.name} onChange={onItemInputChange} />
+        <DialogContent>
+          <TextField id="name" name="name" label="Name" fullWidth value={itemInput.name} onChange={onItemInputChange} />
+        </DialogContent>
         <DialogActions>
           <Button onClick={props.onClose} >
             Cancel

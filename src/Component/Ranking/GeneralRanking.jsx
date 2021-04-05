@@ -91,7 +91,7 @@ const GeneralRanking = (props) => {
         });
       });
     } catch(e) {
-      console.log(e.message);
+      console.log('error adding item to ranking', e.message);
       return;
     }
     blogApi.addItemToRanking(userId, id, rankingItemId.id, selectValue.id)

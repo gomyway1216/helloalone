@@ -25,7 +25,6 @@ const CreateChatGroupDialog = (props) => {
   }, [props.open]);
 
   const handleItemInputChange = e => {
-    console.log('e.target.value', e.target.value);
     setItemInput({
       ...itemInput,
       [e.target.name]: e.target.value,

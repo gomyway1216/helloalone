@@ -23,7 +23,7 @@ const Chat = () => {
   const classes = useStyles();
   const { id } = useParams();
   const { currentUser } = useAuth();
-  let history = useHistory();
+  const history = useHistory();
   const [chats, setChats] = useState([]);
   const [content, setContent] = useState('');
   const [writeError, setWriteError] = useState();
@@ -141,7 +141,6 @@ const Chat = () => {
   }, [inView]);
 
   const handleDialogClose = () => {
-    setDialogOpen(false); // needed?
     history.push('/chat');
   };
 

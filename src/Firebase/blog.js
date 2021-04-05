@@ -22,7 +22,7 @@ export const authenticateUser = () => {
       const user = result.user;
       return [token, user];
     }).catch((error) => {
-    // Handle Errors here.
+      // Handle Errors here.
       const errorCode = error.code;
       const errorMessage = error.message;
       // The email of the user's account used.
