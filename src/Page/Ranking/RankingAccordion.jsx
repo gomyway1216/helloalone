@@ -9,9 +9,7 @@ import MoreVertIcon from '@material-ui/icons/MoreVert';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import EditRankingNameDialog from '../../Component/Dialog/EditRankingNameDialog';
-
-const USER_NAME = 'yyaguchi';
-const ITEM_HEIGHT = 48;
+import { useAuth } from '../../Provider/AuthProvider';
 
 const useStyles = makeStyles((theme) => ({
   backdrop: {
@@ -30,12 +28,14 @@ const RankingAccordion = (props) => {
   const open = Boolean(anchorEl);
   const [dialogOpen, setDialogOpen] = useState(false);
   const classes = useStyles();
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
 
 
   const bigList = async (doc, nestedList, length) => {
     const document = doc.data();
     for(let j = 0; j < document.itemList.length; j++) {
-      const value = await blogApi.getItemById(USER_NAME, document.itemList[j]);
+      const value = await blogApi.getItemById(userId, document.itemList[j]);
       document.itemList[j] = value;
     }
     nestedList.push({ id: doc.id, ...document });
@@ -47,7 +47,7 @@ const RankingAccordion = (props) => {
   };
 
   useEffect(() => {
-    blogApi.streamRankingItemList(USER_NAME, id, {
+    blogApi.streamRankingItemList(userId, id, {
       next: querySnapshot => {
         if(querySnapshot.size === 0) {
           return;
@@ -66,7 +66,7 @@ const RankingAccordion = (props) => {
   }, [itemList]);
 
   useEffect(() => {
-    blogApi.streamItemList(USER_NAME, 'itemCollection', {
+    blogApi.streamItemList(userId, 'itemCollection', {
       next: querySnapshot => {
        
         setLoading(true);
@@ -105,14 +105,14 @@ const RankingAccordion = (props) => {
     } else if(clickedId === 'editTitle') {
       setDialogOpen(true);
     } else if(clickedId === 'deleteRank') {
-      blogApi.deleteRanking(USER_NAME, id);
+      blogApi.deleteRanking(userId, id);
     }
     handleClose();
   };
 
   const handleAddRank = () => {
     setLoading(true);
-    blogApi.createRankingItem(USER_NAME, id, rankingItemList.length + 1);
+    blogApi.createRankingItem(userId, id, rankingItemList.length + 1);
   };
 
   const handleCloseDialog = () => {
@@ -120,7 +120,7 @@ const RankingAccordion = (props) => {
   };
   
   const handleEdiRanking = (ranking) => () => {
-    blogApi.updateRankingTitle(USER_NAME, ranking)
+    blogApi.updateRankingTitle(userId, ranking)
       .then(() => handleCloseDialog());
   };
 
@@ -159,7 +159,7 @@ const RankingAccordion = (props) => {
                   onClose={handleClose}
                   PaperProps={{
                     style: {
-                      maxHeight: ITEM_HEIGHT * 4.5,
+                      maxHeight: 48 * 4.5,
                       width: '20ch',
                     },
                   }}

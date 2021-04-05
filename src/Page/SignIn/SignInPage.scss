@@ -1,0 +1,34 @@
+.signin-page-root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .signin-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    max-width: 80%;
+    margin-top: 10%;
+    margin-bottom: 2%;
+
+    .title-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 5%;
+
+      .title {
+        font-size: xx-large;
+      }
+    }
+
+    .input-field {
+      margin-bottom: 10%;
+    }
+
+    .forgot-password-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 5%;
+    }
+  }
+}

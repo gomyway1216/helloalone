@@ -5,17 +5,18 @@ import { Backdrop, CircularProgress } from '@material-ui/core';
 import ItemListInteract from '../../Component/Ranking/ItemListInteract';
 import RankingAccordion from './RankingAccordion';
 import CreateRankingDialog from '../../Component/Dialog/CreateRankingDialog';
-
-const USER_NAME = 'yyaguchi';
+import { useAuth } from '../../Provider/AuthProvider';
 
 const RankingPage = () => {
   const [loading, setLoading] = useState(false);
   const [rankingMap, setRankingMap] = useState();
   const [tags, setTags] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const { currentUser } = useAuth();
+  const userId = currentUser.uid;
 
   useEffect(() => {
-    blogApi.streamTags(USER_NAME, {
+    blogApi.streamTags(userId, {
       next: querySnapshot => {
         setLoading(true);
         const updateTags = querySnapshot.docs.map(docSnapShot => (
@@ -28,10 +29,13 @@ const RankingPage = () => {
   }, []);
 
   useEffect(() => {
-    blogApi.streamRankingList(USER_NAME, {
+    blogApi.streamRankingList(userId, {
       next: querySnapshot => {
         setLoading(true);
-        const rankingMap = querySnapshot.data().rankingMap;
+        let rankingMap;
+        if(querySnapshot.data()) {
+          rankingMap = querySnapshot.data().rankingMap;
+        }        
         setRankingMap(rankingMap);
         setLoading(false);
       },
@@ -47,7 +51,7 @@ const RankingPage = () => {
   };
   
   const handleCreateRanking = (itemName) => () => {
-    blogApi.createRanking(USER_NAME, itemName)
+    blogApi.createRanking(userId, itemName)
       .then(() => handleCloseDialog());
   };
 

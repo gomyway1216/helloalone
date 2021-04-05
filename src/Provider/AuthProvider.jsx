@@ -1,54 +1,68 @@
-import React, { useState, createContext } from 'react';
-import * as blogApi from '../Firebase/blog';
+import React, { createContext,useEffect, useContext, useState } from 'react';
 import PropTypes from 'prop-types';
+import { auth } from '../Firebase/firebaseConnect';
 
-const defaultLoginInfo = {
-  token: null,
-  user: null
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  return useContext(AuthContext);
 };
 
-export const AuthContext = createContext(defaultLoginInfo);
 
 export const AuthProvider = ({ children }) => {
-  const [loginInfo, setLoginInfo] = useState(
-    JSON.parse(localStorage.getItem('loginInfo')) || defaultLoginInfo
-  );
+  const [currentUser, setCurrentUser] = useState();
+  const [loading, setLoading] = useState(true);
 
-  const login = async () => {
-    const userInfo = await blogApi.authenticateUser();
-    const token = userInfo[0];
-    const user = userInfo[1];
-    localStorage.setItem(
-      'loginInfo',
-      JSON.stringify({ token, user })
-    );
-    setLoginInfo({
-      token,
-      user,
+  const signUp = (email, password) => {
+    return auth.createUserWithEmailAndPassword(email, password);
+  };
+
+  const signIn = (email, password) => {
+    return auth.signInWithEmailAndPassword(email, password);
+  };
+
+  const signOut = () => {
+    return auth.signOut();
+  };
+
+  const resetPassword = (email) => {
+    return auth.sendPasswordResetEmail(email);
+  };
+
+  const updateEmail = (email) => {
+    return currentUser.updateEmail(email);
+  };
+
+  const updatePassword = (password) => {
+    return currentUser.updatePassword(password);
+  };
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(user => {
+      setCurrentUser(user);
+      setLoading(false);
     });
-  };
 
-  const logout = () => {
-    setLoginInfo(defaultLoginInfo);
-    localStorage.removeItem('loginInfo');
-  };
+    return unsubscribe;
+  }, []);
 
-  const { token, user } = loginInfo;
+  const value = {
+    currentUser,
+    signIn,
+    signUp,
+    signOut,
+    resetPassword,
+    updateEmail,
+    updatePassword
+  };
 
   return (
-    <AuthContext.Provider
-      value={{
-        token,
-        user,
-        login,
-        logout,
-      }}
-    >
-      {children}
+    <AuthContext.Provider value={value}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
 
 AuthProvider.propTypes = {
-  children: PropTypes.object
+  children: PropTypes.any
 };
