@@ -86,6 +86,9 @@ const ApplicationBar = () => {
         <ListItem button key={'Chat'} onClick={() => history.push('/chat')} >
           <ListItemText primary={'Chat'} />
         </ListItem>
+        <ListItem button key={'Mini Project'} onClick={() => history.push('/mini-project')} >
+          <ListItemText primary={'Mini Project'} />
+        </ListItem>
       </List>
     </div>
   );
