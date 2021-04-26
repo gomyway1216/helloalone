@@ -1,4 +1,3 @@
-import firebase from 'firebase/app';
 import 'firebase/firestore';
 import 'firebase/auth';
 import * as fbConnect from './firebaseConnect';
