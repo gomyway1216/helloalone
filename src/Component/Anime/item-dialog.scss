@@ -1,0 +1,20 @@
+.content-info {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.edit-button-wrapper {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.cover-image-container {
+  width: 100%;
+  position: relative;
+
+  .cover-image {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}

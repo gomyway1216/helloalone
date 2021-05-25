@@ -89,9 +89,19 @@ const ApplicationBar = () => {
         <ListItem button key={'Mini Project'} onClick={() => history.push('/mini-project')} >
           <ListItemText primary={'Mini Project'} />
         </ListItem>
+        <ListItem button key={'Anime/Manga'} onClick={() => history.push('/anime')} >
+          <ListItemText primary={'Anime/Manga'} />
+        </ListItem> 
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
+          <ListItem button key={'Create Anime/Manga'} onClick={() => history.push('/edit-anime-item')} >
+            <ListItemText primary={'Create Anime/Manga'} />
+          </ListItem>
+        }
       </List>
     </div>
   );
+
+  
 
   return (
     <div className={classes.root}>

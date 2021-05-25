@@ -12,12 +12,16 @@ import TaskListPage from './Page/Task/TaskListPage';
 import SignUpPage from './Page/SignUp/SignUpPage';
 import SignInPage from './Page/SignIn/SignInPage';
 import PrivateRoute from './PrivateRoute';
+import AdminRoute from './AdminRoute';
 import MyPage from './Page/MyPage/MyPage';
 import ForgotPasswordPage from './Page/ForgotPassword/ForgotPasswordPage';
 import ChatGroupPage from './Page/Chat/ChatGroupListPage';
 import ChatPage from './Page/Chat/ChatPage';
 import MiniProjectPage from './Page/MiniProject/MiniProjectPage';
 import PredictionProjectPage from './Page/MiniProject/PredictionProjectPage';
+import AnimePage from './Page/Anime/AnimePage';
+import CreateItemPage from './Page/Anime/CreateItemPage';
+import InvalidPage from './Page/Invalid/InvalidPage';
 
 const Routes = () => {
   return (
@@ -37,6 +41,9 @@ const Routes = () => {
         <Route path='/forgot-password' component={ForgotPasswordPage} />
         <Route path='/mini-project' component={MiniProjectPage} />
         <Route path='/prediction-project' component={PredictionProjectPage} />
+        <Route path='/anime' component={AnimePage} />
+        <AdminRoute path='/edit-anime-item' component={CreateItemPage} />
+        <Route path='/invalid' component={InvalidPage} />
       </Switch>
     </div>
   );
