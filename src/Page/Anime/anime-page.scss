@@ -1,0 +1,12 @@
+.search {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.item-list {
+  display: flex;
+  justify-content: space-evenly;
+  flex-wrap: wrap;
+}
