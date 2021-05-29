@@ -7,6 +7,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import { useAuth } from '../../Provider/AuthProvider';
 import MarkdownEditor from 'rich-markdown-editor';
 import ResponseDialog from '../../Component/Dialog/ResponseDialog';
+import './create-item-page.scss';
 
 const responseDialogDefaultVal = {
   isError: true,
@@ -60,9 +61,7 @@ const CreateItemPage = (props) => {
     // call api
     let downloadURL = null;
     try {
-      console.log('file', file);
       if(file) {
-        console.log('file not defned', file);
         downloadURL = await animeApi.getStorageRef(userId, file);
       }
     } catch(err) {
@@ -133,7 +132,7 @@ const CreateItemPage = (props) => {
     <div>
       <h1>Create item</h1>
       <div>
-        <div style={{ fontSize: 'x-large' }}>Please upload the main image</div>
+        <div>Main Image</div>
         <input
           accept="image/*"
           id="contained-button-file"
@@ -147,12 +146,8 @@ const CreateItemPage = (props) => {
           </Button>
         </label>
       </div>
-      <TextField id="standard-basic" label="Name" value={name} name="name" onChange={handleNameChange}/>
-      <TextField id="standard-basic" label="Score" value={score} name="score" onChange={handleScoreChange}/>
-      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button variant="contained" onClick={() => history.push('/')}>Close</Button>
-        <Button variant="contained" color="primary" onClick={onSave}>Save</Button>     
-      </div>
+      <TextField fullWidth label="Name" value={name} name="name" onChange={handleNameChange}/>
+      <TextField label="Score" value={score} name="score" onChange={handleScoreChange}/>
       <div className="editor">
         <MarkdownEditor
           defaultValue={description}
@@ -162,6 +157,10 @@ const CreateItemPage = (props) => {
           uploadImage={uploadImage}
           onShowToast={(message) => handleSnackBarOpen(message)}
         />
+      </div>
+      <div className="submission">
+        <Button className="button" variant="contained" onClick={() => history.push('/anime')}>Close</Button>
+        <Button className="button" variant="contained" color="primary" onClick={onSave}>Save</Button>     
       </div>
       <Snackbar
         anchorOrigin={{

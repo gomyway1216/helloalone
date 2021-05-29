@@ -73,7 +73,10 @@ ItemDialog.propTypes = {
     description: PropTypes.string.isRequired,
     score: PropTypes.number.isRequired,
     created: PropTypes.any.isRequired,
-    lastUpdated: PropTypes.any.isRequired,
+    lastUpdated: PropTypes.shape({
+      nanoseconds: PropTypes.number.isRequired,
+      seconds: PropTypes.number.isRequired
+    }),
     mainImage: PropTypes.string.isRequired
   })
 };
