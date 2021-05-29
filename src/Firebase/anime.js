@@ -47,6 +47,7 @@ export const addItem = (userId, item) => {
       name: item.name,
       mainImage: item.mainImage,
       description: item.description,
+      score: item.score,
       lastUpdated: currentTime
     });
   } else {

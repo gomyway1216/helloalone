@@ -9,7 +9,7 @@ import './item-dialog.scss';
 
 const ItemDialog = (props) => {
   const [open, setOpen] = useState(props.open);
-  const { id, name, created, lastUpdated, user, mainImage, description } = props.item;
+  const { id, name, created, lastUpdated, user, mainImage, description, score } = props.item;
   const history = useHistory();
   const { currentUser } = useAuth();
   const userId = currentUser ? currentUser.uid : null;
@@ -34,21 +34,24 @@ const ItemDialog = (props) => {
         fullWidth
         maxWidth="lg"
       >
-        <DialogTitle id="name">{name}</DialogTitle>
+        <DialogTitle className="title">{name}</DialogTitle>
         <DialogContent>
-          <div className="cover-image-container">
-            <img className='cover-image' src={mainImage} alt="Cover image" />
-          </div>
-          <div className="content-info">
-            <div className="date">{util.formatDate(created.seconds)}</div>
-            <div className="date">{util.formatDate(lastUpdated.seconds)}</div>
-          </div>
-          {userId === user && 
+          <div className="main">
+            <div className="cover-image-container">
+              <img className='cover-image' src={mainImage} alt="Cover image" />
+            </div>
+            <div className="content-info">
+              <div className="date">Created: {util.formatDate(created.seconds)}</div>
+              <div className="date">Last Updated: {util.formatDate(lastUpdated.seconds)}</div>
+              <div className="score">Score: {score}</div>
+            </div>
+            {userId === user && 
             <div className="edit-button-wrapper">
               <Button variant="contained" onClick={handleEdit}>Edit</Button>
             </div>
-          }
-          <ReactMarkdown>{description}</ReactMarkdown>
+            }
+            <ReactMarkdown>{description}</ReactMarkdown>
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={props.onClose} >
@@ -68,6 +71,7 @@ ItemDialog.propTypes = {
     name: PropTypes.string.isRequired,
     user: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
+    score: PropTypes.number.isRequired,
     created: PropTypes.any.isRequired,
     lastUpdated: PropTypes.any.isRequired,
     mainImage: PropTypes.string.isRequired
