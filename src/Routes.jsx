@@ -30,7 +30,7 @@ const Routes = () => {
         <Route path='/blog' component={BlogListPage} exact />
         <Route path='/blog/:id' component={BlogPage} />
         <PrivateRoute path='/ranking' component={RankingPage} />
-        <PrivateRoute path='/task' component={TaskListPage} />
+        <AdminRoute path='/task' component={TaskListPage} />
         <PrivateRoute path='/chat' component={ChatGroupPage} exact />
         <PrivateRoute path='/chat/:id' component={ChatPage} />
         <Route path='/signup' component={SignUpPage} />

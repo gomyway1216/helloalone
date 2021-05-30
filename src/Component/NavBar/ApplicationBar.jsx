@@ -5,8 +5,9 @@ import { AppBar, Toolbar, Typography, IconButton, ListItem,
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import { useHistory } from 'react-router-dom';
-import { useAuth } from '../Provider/AuthProvider';
+import { useAuth } from '../../Provider/AuthProvider';
 import { Alert, AlertTitle } from '@material-ui/lab';
+import './application-bar.scss';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -15,10 +16,7 @@ const useStyles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: theme.spacing(2),
-  },
-  title: {
-    flexGrow: 1,
-  },
+  }
 }));
 
 const ApplicationBar = () => {
@@ -57,6 +55,10 @@ const ApplicationBar = () => {
     history.push('/mypage');
   };
 
+  const handlePageNameClick = () => {
+    history.push('/');
+  };
+
   const toggleDrawer = (open) => e => {
     if (e.type === 'keydown' && (e.key === 'Tab' || e.key === 'Shift')) {
       return;
@@ -82,9 +84,11 @@ const ApplicationBar = () => {
             <ListItemText primary={'Create Blog'} />
           </ListItem>
         }
-        <ListItem button key={'Task List'} onClick={() => history.push('/task')} >
-          <ListItemText primary={'Task List'} />
-        </ListItem>
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
+          <ListItem button key={'Task List'} onClick={() => history.push('/task')} >
+            <ListItemText primary={'Task List'} />
+          </ListItem>
+        }
         <ListItem button key={'Chat'} onClick={() => history.push('/chat')} >
           <ListItemText primary={'Chat'} />
         </ListItem>
@@ -112,10 +116,10 @@ const ApplicationBar = () => {
           <IconButton edge="start" className={classes.menuButton} color="inherit" aria-label="menu" onClick={toggleDrawer(true)}>
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" className={classes.title}>
+          <div className="page-name" onClick={handlePageNameClick}>
             Hello Alone!
-          </Typography>
-          <div>
+          </div>
+          <div className="account-button-wrapper">
             <IconButton
               aria-label="account of current user"
               aria-controls="menu-appbar"
