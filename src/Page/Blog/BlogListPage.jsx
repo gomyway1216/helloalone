@@ -1,29 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import * as blogApi from '../../Firebase/blog';
 import CustomCard from '../../Component/Blog/CustomCard';
-import './BlogListPage.scss';
+import { Backdrop, CircularProgress } from '@material-ui/core';
+import './blog-list-page.scss';
 
 const Blog = () => {
+  const [loading, setLoading] = useState(false);
   const [blogList, setBlogList] = useState();
 
-
   const getBlogIdList = async () => {
-    const result = await blogApi.getBlogList(process.env.REACT_APP_DEFAULT_BLOG_USER);
+    setLoading(true);
+    const result = await blogApi.getBlogList();
     setBlogList(result);
+    setLoading(false);
   };
 
   useEffect(() => {
     getBlogIdList();
   }, []);
 
+  if(loading) {
+    return (
+      <Backdrop open={loading} >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    );
+  }
+
   return (
     <div className="blog-container">
-      <h1>Blog List</h1>
-      {/* {blogList && blogList.map(blog => 
-        <CustomCard key={blog.id} blog={blog}/>
-      )} */}
-      {blogList && blogList.map(blog => 
-        <CustomCard key={blog.id} blog={blog}/>
+      <div className="title">Blog List</div>
+      {blogList && blogList.map(item => 
+        <CustomCard key={item.id} item={item}/>
       )}
     </div>
   );

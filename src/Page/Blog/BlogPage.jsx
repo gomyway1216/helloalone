@@ -1,36 +1,49 @@
 import React, { useState, useEffect } from 'react';
-import 'react-quill/dist/quill.snow.css';
 import * as blogApi from '../../Firebase/blog';
-import parse from 'html-react-parser';
+import ReactMarkdown from 'react-markdown';
+import { useHistory } from 'react-router-dom';
 import { useParams } from 'react-router-dom';
 import * as util from '../../util/util';
-import FavoriteBorderIcon from '@material-ui/icons/FavoriteBorder';
+import { useAuth } from '../../Provider/AuthProvider';
+import { Button } from '@material-ui/core';
+import './blog-page.scss';
 
 const BlogPage = () => {
   const [blog, setBlog] = useState();
   const {id} = useParams();
+  const history = useHistory();
+  const { currentUser } = useAuth();
+  const userId = currentUser ? currentUser.uid : null;
 
   useEffect(() => {
     blogApi.getBlog(process.env.REACT_APP_DEFAULT_BLOG_USER, id)
       .then(doc => setBlog(doc));
   }, []);
 
+  const handleEdit = () => {
+    history.push('/edit-blog-item', {
+      item: blog
+    });
+  };
+
   return (
     <>
       {blog && 
-      <div style={{ margin: 'auto', width: '50%'}}>
-        <h1>{blog.name}</h1>  
-        <div style={{ padding: '5px'}}>
-          <img style={{maxWidth: '100%', maxHeight: '100%'}} src={blog.mainImage} alt="Main Image"/>
+      <div className="blog-page-wrapper">
+        <div className="title" >{blog.name}</div>  
+        <div className="main-image-wrapper">
+          <img className="main-image" src={blog.mainImage} alt="Main Image"/>
         </div>
-        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-          <div style={{display: 'flex', flexDirection: 'row'}}>
-            <div>{blog.user}</div>
-            <div style={{marginLeft: '10px'}}>{util.formatDate(blog.timestamp)}</div>
+        <div className="content-info">
+          <div className="date">Created: {util.formatDate(blog.created.seconds)}</div>
+          <div className="date">Last Updated: {util.formatDate(blog.lastUpdated.seconds)}</div>
+        </div>
+        {userId === blog.user && 
+          <div className="edit-button-wrapper">
+            <Button variant="contained" onClick={handleEdit}>Edit</Button>
           </div>
-          <FavoriteBorderIcon />
-        </div>
-        <div>{parse(blog.body)}</div> 
+        }
+        <ReactMarkdown>{blog.description}</ReactMarkdown> 
       </div>
       }
     </>

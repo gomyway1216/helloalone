@@ -77,9 +77,11 @@ const ApplicationBar = () => {
         <ListItem button key={'Ranking'} onClick={() => history.push('/ranking')} >
           <ListItemText primary={'Ranking'} />
         </ListItem>
-        <ListItem button key={'Create Blog'} onClick={() => history.push('/create')} >
-          <ListItemText primary={'Create Blog'} />
-        </ListItem>
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) &&
+          <ListItem button key={'Create Blog'} onClick={() => history.push('/edit-blog-item')} >
+            <ListItemText primary={'Create Blog'} />
+          </ListItem>
+        }
         <ListItem button key={'Task List'} onClick={() => history.push('/task')} >
           <ListItemText primary={'Task List'} />
         </ListItem>

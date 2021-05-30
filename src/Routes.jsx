@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  Route,
-  Switch
-} from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import HomePage from './Page/Home/HomePage';
 import CreateBlogPage from './Page/Blog/CreateBlogPage';
 import BlogListPage from './Page/Blog/BlogListPage';
@@ -29,7 +26,7 @@ const Routes = () => {
       <Switch>
         <Route path='/' component={HomePage} exact />
         <PrivateRoute path='/mypage' component={MyPage} />
-        <PrivateRoute path='/create' component={CreateBlogPage} />
+        <AdminRoute path='/edit-blog-item' component={CreateBlogPage} />
         <Route path='/blog' component={BlogListPage} exact />
         <Route path='/blog/:id' component={BlogPage} />
         <PrivateRoute path='/ranking' component={RankingPage} />
