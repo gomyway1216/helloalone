@@ -184,8 +184,9 @@ const CreateItemPage = (props) => {
   );
 };
 
+// location is required when edit mode is selected from existing item
 CreateItemPage.propTypes = {
-  location: PropTypes.any
+  location: PropTypes.object
 };
 
 export default CreateItemPage;

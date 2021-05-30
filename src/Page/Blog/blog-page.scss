@@ -1,0 +1,35 @@
+.blog-page-wrapper {
+  margin: auto;
+  width: 50%;
+
+  .title {
+    display: flex;
+    justify-content: center;
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+  }
+
+  .main-image-wrapper {
+    padding: 5px;
+
+    .main-image {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  }
+
+  .content-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .date {
+      font-weight: 1.2rem;
+    }
+  }
+
+  .edit-button-wrapper {
+    display: flex;
+    justify-content: flex-end;
+  } 
+}

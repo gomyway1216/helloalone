@@ -1,49 +1,108 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import * as blogApi from '../../Firebase/blog';
-import { Button, TextField } from '@material-ui/core';
-import parse from 'html-react-parser';
+import { useHistory } from 'react-router-dom';
+import { Button, TextField, Snackbar, IconButton } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 import { useAuth } from '../../Provider/AuthProvider';
+import MarkdownEditor from 'rich-markdown-editor';
+import ResponseDialog from '../../Component/Dialog/ResponseDialog';
+import './create-blog-page.scss';
 
-const CreateBlog = ({ history }) => {
-  const [name, setName] = useState('');
-  const [body, setBody] = useState('');
+const responseDialogDefaultVal = {
+  isError: true,
+  errorMessage: ''
+};
+
+const CreateBlogPage = (props) => {
+  let original = {
+    name: '',
+    description: '',
+    file: null
+  };
+  let docId = null;
+  if(props.location && props.location.state && props.location.state.item) {
+    original = props.location.state.item;
+    docId = original.id;
+  }
+
+  const [name, setName] = useState(original.name);
+  const [description, setDescription] = useState(original.description);
   const [file, setFile] = useState();
   const { currentUser } = useAuth();
   const userId = currentUser.uid;
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState('');
+  const [responseStatus, setResponseStatus] = useState(responseDialogDefaultVal);
+  const history = useHistory();
+  const [openSnackBar, setOpenSnackBar] = useState(false);
 
-  const modules = {
-    toolbar: [
-      [{ 'font': [] }],
-      [{ 'header': [1, 2,3,4,5, false] }],
-      ['bold', 'italic', 'underline'],
-      [{'list': 'ordered'}, {'list': 'bullet'}],
-      [{ 'align': [] }],
-      [{ 'color': [] }, { 'background': [] }],
-      ['link', 'image', 'video'],
-      ['clean']
-    ]
+  const handleSnackBarOpen = (message) => {
+    setSnackBarMessage(message);
+    setOpenSnackBar(true);
+  };
+
+  const handleSnackBarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setOpenSnackBar(false);
+  };
+
+  const uploadImage = async (file) => {
+    const downloadURL = await blogApi.getStorageRef(userId, file);
+    return downloadURL;
   };
 
   const onSave = async () => {
-    if(!name || !body || !file) {
-      console.log('please provide the values');
+    // call api
+    let downloadURL = null;
+    try {
+      if(file) {
+        downloadURL = await blogApi.getStorageRef(userId, file);
+      }
+    } catch(err) {
+      setResponseStatus({
+        isError: true,
+        errorMessage: err
+      });
+      setDialogOpen(true);
+    }
+
+    if(!userId || !name || !description || (!downloadURL && !original.mainImage)) {
+      setResponseStatus({
+        isError: true,
+        errorMessage: 'Please fill all the required fields'
+      });
+      setDialogOpen(true);
       return;
     }
-    const downloadURL = await blogApi.getStorageRef(file);
-    const value = {
+
+    const item = {
       user: userId,
       name: name,
-      body: body,
-      mainImage: downloadURL
+      description: description,
+      mainImage: downloadURL ? downloadURL : original.mainImage
     };
-    blogApi.addBlog(userId, value)
+    if(docId) {
+      item.docId = docId;
+    }
+
+    blogApi.addBlog(userId, item)
       .then(() => {
-        window.location.reload();
+        setResponseStatus({
+          isError: false
+        });
+        setDialogOpen(true);
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        setResponseStatus({
+          isError: true,
+          errorMessage: err
+        });
+        setDialogOpen(true);
+      });
   };
 
   const handleNameChange = (e) => {
@@ -55,20 +114,18 @@ const CreateBlog = ({ history }) => {
     setFile(selectedFile);
   };
 
-  const formats = [
-    'font',
-    'size',
-    'bold', 'italic', 'underline',
-    'list', 'bullet',
-    'align',
-    'color', 'background', 'image', 'video'
-  ];
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+    if(!responseStatus.isError) {
+      history.push('/blog');
+    }
+  };
 
   return (
     <div>
-      <h1>Create blog</h1>
+      <h1>Create item</h1>
       <div>
-        <div style={{ fontSize: 'x-large' }}>Please upload the main image</div>
+        <div>Main Image</div>
         <input
           accept="image/*"
           id="contained-button-file"
@@ -82,24 +139,46 @@ const CreateBlog = ({ history }) => {
           </Button>
         </label>
       </div>
-      <TextField id="standard-basic" label="Name" value={name} onChange={handleNameChange}/>
-      <ReactQuill theme="snow"
-        modules={modules} formats={formats} 
-        value={body} onChange={setBody}/>
-      <div style={{display: 'flex', justifyContent: 'flex-end'}}>
-        <Button variant="contained" onClick={() => history.push('/')}>Close</Button>
-        <Button variant="contained" color="primary" onClick={onSave}>Save</Button>     
+      <TextField fullWidth label="Name" value={name} name="name" onChange={handleNameChange}/>
+      <div className="editor">
+        <MarkdownEditor
+          defaultValue={description}
+          onChange={(getValue) => {
+            setDescription(getValue());
+          }}
+          uploadImage={uploadImage}
+          onShowToast={(message) => handleSnackBarOpen(message)}
+        />
       </div>
-      <div>
-        <div style={{ fontSize: 'x-large' }}>Preview</div>
-        {parse(body)}
+      <div className="submission">
+        <Button className="button" variant="contained" onClick={() => history.push('/blog')}>Close</Button>
+        <Button className="button" variant="contained" color="primary" onClick={onSave}>Save</Button>     
       </div>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={openSnackBar}
+        autoHideDuration={6000}
+        onClose={handleSnackBarClose}
+        message={snackBarMessage}
+        action={
+          <React.Fragment>
+            <IconButton size="small" aria-label="close" color="inherit" onClick={handleSnackBarClose}>
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
+      <ResponseDialog open={dialogOpen} responseStatus={responseStatus} onClose={handleDialogClose} />
     </div>
   );
 };
 
-export default CreateBlog;
-
-CreateBlog.propTypes = {
-  history: PropTypes.object
+// location is required when edit mode is selected from existing item
+CreateBlogPage.propTypes = {
+  location: PropTypes.object
 };
+
+export default CreateBlogPage;

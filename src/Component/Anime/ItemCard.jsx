@@ -53,7 +53,6 @@ const ItemCard = (props) => {
                   className="description"
                   innerElement="p"
                 />
-                {/* <div className='description'>{description}</div> */}
                 <div className='score'>{score}</div>
               </div>    
             </div>

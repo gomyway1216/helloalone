@@ -37,21 +37,35 @@ export const getDbAccess = () => {
   return fbConnect.exportDbAccess();
 };
 
-export const addBlog = (userName, value) => {
-  const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-  value.timestamp = timestamp;
-  return getDbAccess().collection(userName).doc('blog').collection('blogCollection')
-    .add(value);
+export const addBlog = (userId, item) => {
+  if(userId !== process.env.REACT_APP_DEFAULT_USER) {
+    throw new Error('Your account is not authorized for this action.');
+  }
+  const currentTime = firebase.firestore.FieldValue.serverTimestamp();  
+  const collectionRef = getDbAccess().collection(item.user).doc('blog').collection('blogCollection');
+  // if the adding item exists, update the item
+  if(item.docId) {
+    return collectionRef.doc(item.docId).update({
+      name: item.name,
+      mainImage: item.mainImage,
+      description: item.description,
+      lastUpdated: currentTime
+    });
+  } else {
+    item.created = currentTime;
+    item.lastUpdated = currentTime;
+    return collectionRef.add(item);
+  }
 };
 
-export const getBlogList = (userName) => {
-  return getDbAccess().collection(userName).doc('blog').collection('blogCollection')
+export const getBlogList = () => {
+  return getDbAccess().collection(process.env.REACT_APP_DEFAULT_USER).doc('blog').collection('blogCollection')
     .get().then((querySnapshot) => {
       const list = [];
       querySnapshot.forEach((doc) => {
         const element = {
           id: doc.id,
-          value: doc.data()
+          ...doc.data()
         };
         list.push(element);
       });
@@ -62,7 +76,7 @@ export const getBlogList = (userName) => {
 export const getBlog = (userName, id) => {
   return getDbAccess().collection(userName).doc('blog').collection('blogCollection').doc(id)
     .get().then(doc => {
-      return doc.data();
+      return { id, ...doc.data()};
     });
 };
 
@@ -280,9 +294,13 @@ export const deleteRanking = (userName, rankingId) => {
     );
 };
 
-export const getStorageRef = async (file) => {
+export const getStorageRef = async (userId, file) => {
+  if(userId !== process.env.REACT_APP_DEFAULT_USER) {
+    throw new Error('Your account is not authorized for this action.');
+  }
+
   const storageRef = fbConnect.exportStorageAccess().ref();
-  const fileRef = storageRef.child(file.name);
+  const fileRef = storageRef.child('blog/' + file.name);
   await fileRef.put(file);
   const downloadURL = await fileRef.getDownloadURL();
   return downloadURL;
