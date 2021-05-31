@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import * as animeApi from '../../Firebase/anime';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { TextField, Backdrop, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
+import { IconButton, TextField, Backdrop, CircularProgress, FormControl, InputLabel, Select, MenuItem } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import ItemCard from '../../Component/Anime/ItemCard';
+import CriteriaDialog from '../../Component/Dialog/CriteriaDialog';
+import InfoIcon from '@material-ui/icons/Info';
 import './anime-page.scss';
 
 const useStyles = makeStyles((theme) => ({
@@ -30,6 +32,7 @@ const AnimePage = () => {
   itemList.sort((a, b) => a.name > b.name ? 1 : -1);
   const [filteredItemList, setFilteredItemList] = useState(itemList);
   const [orderBy, setOrderBy] = useState(ALPHANUMERICAL);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const classes = useStyles();
 
   const handleOrderChange = (event) => {
@@ -64,6 +67,14 @@ const AnimePage = () => {
     setFilteredItemList(filtered);
   }, [orderBy, inputValue]);
 
+  const handleDialogClose = () => {
+    setDialogOpen(false);
+  };
+
+  const handleCriteriaOpen = () => {
+    setDialogOpen(true);
+  };
+
   if(loading) {
     return (
       <Backdrop open={loading} >
@@ -74,7 +85,12 @@ const AnimePage = () => {
 
   return (
     <div>
-      <div className="title">Anime/Manga List</div>
+      <div className="title-wrapper">
+        <div className="title">Anime/Manga List</div>
+        <IconButton aria-label="criteria" color="primary" className="criteria-icon-button" onClick={handleCriteriaOpen}>
+          <InfoIcon />
+        </IconButton>
+      </div>
       <div className="search">
         <Autocomplete
           value={selectValue}
@@ -113,6 +129,7 @@ const AnimePage = () => {
           <ItemCard key={item.id} item={item} />
         )}
       </div>
+      <CriteriaDialog open={dialogOpen} onClose={handleDialogClose} />
     </div>
   );
 };
