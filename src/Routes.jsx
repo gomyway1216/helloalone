@@ -19,6 +19,16 @@ import PredictionProjectPage from './Page/MiniProject/PredictionProjectPage';
 import AnimePage from './Page/Anime/AnimePage';
 import CreateItemPage from './Page/Anime/CreateItemPage';
 import InvalidPage from './Page/Invalid/InvalidPage';
+import TestSignInPage from './Page/Test/Login';
+import TestSignUpPage from './Page/Test/Register';
+import HomPage from './Page/Test/Home';
+import Profile from './Page/Test/Profile';
+import BoardAdmin from './Page/Test/BoardAdmin';
+import BoardUser from './Page/Test/BoardUser';
+import BoardModerator from './Page/Test/BoardModerator';
+import FriendsPage from './Page/Friend/FriendsPage';
+import FriendPage from './Page/Friend/FriendPage';
+import AddFriendPage from './Page/Friend/AddFriendPage';
 
 const Routes = () => {
   return (
@@ -41,6 +51,16 @@ const Routes = () => {
         <Route path='/anime' component={AnimePage} />
         <AdminRoute path='/edit-anime-item' component={CreateItemPage} />
         <Route path='/invalid' component={InvalidPage} />
+        <Route path='/testsignin' component={TestSignInPage} />
+        <Route path='/testsignup' component={TestSignUpPage} />
+        <Route path="/testuser" component={BoardUser} />
+        <Route path='/hom' component={HomPage} />
+        <Route path='/profile' component={Profile} />
+        <Route path='/board' component={BoardModerator} />
+        <Route path="/admin" component={BoardAdmin} />
+        <Route path="/friends" component={FriendsPage} exact/>
+        <Route path="/add-friend" component={AddFriendPage} />
+        <PrivateRoute path='/friends/:id' component={FriendPage} />
       </Switch>
     </div>
   );
