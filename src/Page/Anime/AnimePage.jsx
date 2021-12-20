@@ -83,6 +83,8 @@ const AnimePage = () => {
     );
   }
 
+  console.log('filteredItemList', filteredItemList);
+
   return (
     <div>
       <div className="title-wrapper">
