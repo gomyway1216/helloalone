@@ -32,18 +32,6 @@ export const getObjectIndexById = (list, obj) => {
     }
   }
   return -1;
-<<<<<<< HEAD
-};
-
-export const getAuthHeader = () => {
-  const user = JSON.parse(localStorage.getItem('user'));
-
-  if (user && user.accessToken) {
-    return { Authorization: 'Bearer ' + user.accessToken }; // for Spring Boot back-end
-    // return { 'x-access-token': user.accessToken };       // for Node.js Express back-end
-  } else {
-    return {};
-  }
 };
 
 export const filterItem = (inputVal, list) => {
@@ -59,6 +47,4 @@ export const filterItem = (inputVal, list) => {
     filtered = list.filter(item => item.name_english.toLowerCase().includes(inputVal.toLowerCase()));
   }
   return filtered;
-=======
->>>>>>> parent of ead321b (adding friends page)
 };

@@ -76,8 +76,6 @@ const ItemDialog = (props) => {
     });
   };
 
-  console.log('characterList!!!', characterList);
-
   return (
     <div className={styles.dialogRoot}>
       <Dialog
@@ -99,7 +97,7 @@ const ItemDialog = (props) => {
                 <div className={styles.details}>
                   <div className={styles.date}>Created: {util.formatDate(created.seconds)}</div>
                   <div className={styles.date}>Last Updated: {util.formatDate(lastUpdated.seconds)}</div>
-                  <Rating name="read-only" value={score/2} precision={0.01} size="large" readOnly />
+                  <Rating name="read-only" value={score/2} precision={0.1} size="large" readOnly />
                   <div className={styles.score}>Score: {score}</div>
                   <div>Tags</div>
                   <Stack direction="column" spacing={1}>
@@ -127,7 +125,7 @@ const ItemDialog = (props) => {
                       <div className={styles.volumeItem} key={item.type}>
                         <Typography component="legend">{item.type}: {item.volume} {item.continuing ? '...' : ''}</Typography>
                       </div> : 
-                      <div>
+                      <div key={'seasons'}>
                         <Typography component="legend">{item.type}</Typography>
                         {
                           item.seasons.map((season) =>

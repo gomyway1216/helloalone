@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const VoiceActorListPage = () => {
+  const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const location = useLocation();
   const name = location && location.state ? location.state.name : '';

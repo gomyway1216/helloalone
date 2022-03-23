@@ -157,13 +157,6 @@ const CreateItemPage = (props) => {
     }
   };
 
-  // const onTagInputChange = (updatedTags) => {
-  //   setItemInput({
-  //     ...itemInput,
-  //     tags: updatedTags
-  //   });
-  // };
-
   if(loading) {
     return (
       <Backdrop open={loading} >

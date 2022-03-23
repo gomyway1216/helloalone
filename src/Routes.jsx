@@ -20,24 +20,11 @@ import AnimePage from './Page/Anime/AnimePage';
 import CreateItemPage from './Page/Anime/CreateItemPage';
 import AddTagPage from './Page/Anime/AddTagPage';
 import InvalidPage from './Page/Invalid/InvalidPage';
-<<<<<<< HEAD
-import TestSignInPage from './Page/Test/Login';
-import TestSignUpPage from './Page/Test/Register';
-import HomPage from './Page/Test/Home';
-import Profile from './Page/Test/Profile';
-import BoardAdmin from './Page/Test/BoardAdmin';
-import BoardUser from './Page/Test/BoardUser';
-import BoardModerator from './Page/Test/BoardModerator';
-import FriendsPage from './Page/Friend/FriendsPage';
-import FriendPage from './Page/Friend/FriendPage';
-import AddFriendPage from './Page/Friend/AddFriendPage';
 import VoiceActorListPage from './Page/VoiceActor/VoiceActorListPage';
 import VoiceActorPage from './Page/VoiceActor/VoiceActorPage';
 import AddVoiceActorPage from './Page/VoiceActor/AddVoiceActorPage';
 import AnimeCharacterListPage from './Page/Anime/AnimeCharacterListPage';
 import AddAnimeCharacterPage from './Page/Anime/AddAnimeCharacterPage';
-=======
->>>>>>> parent of ead321b (adding friends page)
 
 const Routes = () => {
   return (
@@ -61,24 +48,11 @@ const Routes = () => {
         <AdminRoute path='/edit-anime-item' component={CreateItemPage} />
         <AdminRoute path='/add-tag' component={AddTagPage} />
         <Route path='/invalid' component={InvalidPage} />
-<<<<<<< HEAD
-        <Route path='/testsignin' component={TestSignInPage} />
-        <Route path='/testsignup' component={TestSignUpPage} />
-        <Route path='/testuser' component={BoardUser} />
-        <Route path='/hom' component={HomPage} />
-        <Route path='/profile' component={Profile} />
-        <Route path='/board' component={BoardModerator} />
-        <Route path="/admin" component={BoardAdmin} />
-        <Route path="/friends" component={FriendsPage} exact/>
-        <Route path="/add-friend" component={AddFriendPage} />
-        <PrivateRoute path='/friends/:id' component={FriendPage} />
         <Route path='/voice-actor' component={VoiceActorListPage} exact />
         <Route path='/voice-actor/:id' component={VoiceActorPage} />
         <AdminRoute path='/edit-voice-actor' component={AddVoiceActorPage} />
         <Route path='/anime-character' component={AnimeCharacterListPage} exact />
         <AdminRoute path='/edit-anime-character' component={AddAnimeCharacterPage} />
-=======
->>>>>>> parent of ead321b (adding friends page)
       </Switch>
     </div>
   );
