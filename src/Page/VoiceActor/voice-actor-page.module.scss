@@ -1,0 +1,19 @@
+.content {
+  display: flex;
+  flex-direction: row;
+  
+  .imageContainer {
+    width: 30vw;
+    // margin: auto;
+
+    .image {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  .animeListContainer {
+    margin: 20px;
+  }
+}
