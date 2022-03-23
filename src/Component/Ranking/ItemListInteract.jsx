@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import * as blogApi from '../../Firebase/blog';
-import { TextField, Button, List, ListItem, ListItemText, Chip } from '@material-ui/core';
+import { TextField, Button, List, ListItem, ListItemText } from '@material-ui/core';
+import Chip from '@mui/material/Chip';
 import * as rankingConstants from './constants';
 import DescriptionDialog from '../Dialog/DescriptionDialog';
 import DeleteDialog from '../Dialog/DeleteDialog';

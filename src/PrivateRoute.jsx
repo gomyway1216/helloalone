@@ -1,5 +1,4 @@
 import React from 'react';
-import { Component } from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { useAuth } from './Provider/AuthProvider';
 import PropTypes from 'prop-types';

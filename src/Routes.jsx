@@ -18,6 +18,7 @@ import MiniProjectPage from './Page/MiniProject/MiniProjectPage';
 import PredictionProjectPage from './Page/MiniProject/PredictionProjectPage';
 import AnimePage from './Page/Anime/AnimePage';
 import CreateItemPage from './Page/Anime/CreateItemPage';
+import AddTagPage from './Page/Anime/AddTagPage';
 import InvalidPage from './Page/Invalid/InvalidPage';
 import TestSignInPage from './Page/Test/Login';
 import TestSignUpPage from './Page/Test/Register';
@@ -29,6 +30,11 @@ import BoardModerator from './Page/Test/BoardModerator';
 import FriendsPage from './Page/Friend/FriendsPage';
 import FriendPage from './Page/Friend/FriendPage';
 import AddFriendPage from './Page/Friend/AddFriendPage';
+import VoiceActorListPage from './Page/VoiceActor/VoiceActorListPage';
+import VoiceActorPage from './Page/VoiceActor/VoiceActorPage';
+import AddVoiceActorPage from './Page/VoiceActor/AddVoiceActorPage';
+import AnimeCharacterListPage from './Page/Anime/AnimeCharacterListPage';
+import AddAnimeCharacterPage from './Page/Anime/AddAnimeCharacterPage';
 
 const Routes = () => {
   return (
@@ -50,10 +56,11 @@ const Routes = () => {
         <Route path='/prediction-project' component={PredictionProjectPage} />
         <Route path='/anime' component={AnimePage} />
         <AdminRoute path='/edit-anime-item' component={CreateItemPage} />
+        <AdminRoute path='/add-tag' component={AddTagPage} />
         <Route path='/invalid' component={InvalidPage} />
         <Route path='/testsignin' component={TestSignInPage} />
         <Route path='/testsignup' component={TestSignUpPage} />
-        <Route path="/testuser" component={BoardUser} />
+        <Route path='/testuser' component={BoardUser} />
         <Route path='/hom' component={HomPage} />
         <Route path='/profile' component={Profile} />
         <Route path='/board' component={BoardModerator} />
@@ -61,6 +68,11 @@ const Routes = () => {
         <Route path="/friends" component={FriendsPage} exact/>
         <Route path="/add-friend" component={AddFriendPage} />
         <PrivateRoute path='/friends/:id' component={FriendPage} />
+        <Route path='/voice-actor' component={VoiceActorListPage} exact />
+        <Route path='/voice-actor/:id' component={VoiceActorPage} />
+        <AdminRoute path='/edit-voice-actor' component={AddVoiceActorPage} />
+        <Route path='/anime-character' component={AnimeCharacterListPage} exact />
+        <AdminRoute path='/edit-anime-character' component={AddAnimeCharacterPage} />
       </Switch>
     </div>
   );
