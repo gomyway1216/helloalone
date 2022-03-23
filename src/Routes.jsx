@@ -20,6 +20,7 @@ import AnimePage from './Page/Anime/AnimePage';
 import CreateItemPage from './Page/Anime/CreateItemPage';
 import AddTagPage from './Page/Anime/AddTagPage';
 import InvalidPage from './Page/Invalid/InvalidPage';
+<<<<<<< HEAD
 import TestSignInPage from './Page/Test/Login';
 import TestSignUpPage from './Page/Test/Register';
 import HomPage from './Page/Test/Home';
@@ -35,6 +36,8 @@ import VoiceActorPage from './Page/VoiceActor/VoiceActorPage';
 import AddVoiceActorPage from './Page/VoiceActor/AddVoiceActorPage';
 import AnimeCharacterListPage from './Page/Anime/AnimeCharacterListPage';
 import AddAnimeCharacterPage from './Page/Anime/AddAnimeCharacterPage';
+=======
+>>>>>>> parent of ead321b (adding friends page)
 
 const Routes = () => {
   return (
@@ -58,6 +61,7 @@ const Routes = () => {
         <AdminRoute path='/edit-anime-item' component={CreateItemPage} />
         <AdminRoute path='/add-tag' component={AddTagPage} />
         <Route path='/invalid' component={InvalidPage} />
+<<<<<<< HEAD
         <Route path='/testsignin' component={TestSignInPage} />
         <Route path='/testsignup' component={TestSignUpPage} />
         <Route path='/testuser' component={BoardUser} />
@@ -73,6 +77,8 @@ const Routes = () => {
         <AdminRoute path='/edit-voice-actor' component={AddVoiceActorPage} />
         <Route path='/anime-character' component={AnimeCharacterListPage} exact />
         <AdminRoute path='/edit-anime-character' component={AddAnimeCharacterPage} />
+=======
+>>>>>>> parent of ead321b (adding friends page)
       </Switch>
     </div>
   );

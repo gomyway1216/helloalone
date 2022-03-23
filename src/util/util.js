@@ -32,6 +32,7 @@ export const getObjectIndexById = (list, obj) => {
     }
   }
   return -1;
+<<<<<<< HEAD
 };
 
 export const getAuthHeader = () => {
@@ -58,4 +59,6 @@ export const filterItem = (inputVal, list) => {
     filtered = list.filter(item => item.name_english.toLowerCase().includes(inputVal.toLowerCase()));
   }
   return filtered;
+=======
+>>>>>>> parent of ead321b (adding friends page)
 };
