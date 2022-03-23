@@ -103,6 +103,27 @@ const ApplicationBar = () => {
             <ListItemText primary={'Create Anime/Manga'} />
           </ListItem>
         }
+        <ListItem button key={'Voice Actor'} onClick={() => history.push('/voice-actor')} >
+          <ListItemText primary={'Voice Actor'} />
+        </ListItem> 
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
+          <ListItem button key={'Add Voice Actor'} onClick={() => history.push('/edit-voice-actor')} >
+            <ListItemText primary={'Add Voice Actor'} />
+          </ListItem>
+        }
+        <ListItem button key={'Anime Character'} onClick={() => history.push('/anime-character')} >
+          <ListItemText primary={'Anime Character'} />
+        </ListItem> 
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
+          <ListItem button key={'Add Anime Character'} onClick={() => history.push('/edit-anime-character')} >
+            <ListItemText primary={'Add Anime Character'} />
+          </ListItem>
+        }
+        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
+          <ListItem button key={'Add Anime Tag'} onClick={() => history.push('/add-tag')} >
+            <ListItemText primary={'Add Anime Tag'} />
+          </ListItem>
+        }
       </List>
     </div>
   );

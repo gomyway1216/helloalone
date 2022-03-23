@@ -1,0 +1,22 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  width: 40vw;
+  margin-bottom: 10px;
+
+  .imageContainer {
+    .image {
+      width: 10vw
+    }
+  }
+
+  .text {
+    .mainText {
+      font-size: x-large;
+    }
+
+    .subText {
+
+    }
+  }
+}

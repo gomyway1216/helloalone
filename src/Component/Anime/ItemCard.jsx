@@ -4,13 +4,13 @@ import { makeStyles } from '@material-ui/core/styles';
 import { Card, CardActionArea, CardContent, CardMedia } from '@material-ui/core';
 import ItemDialog from './ItemDialog';
 import ClampLines from 'react-clamp-lines';
-import './item-card.scss';
+import styles from './item-card.module.scss';
 
 const useStyles = makeStyles({
   root: {
     padding: 10,
     width: 300,
-    height: 300,
+    height: 350,
     margin: 20
   },
   media: {
@@ -20,7 +20,7 @@ const useStyles = makeStyles({
 
 const ItemCard = (props) => {
   const classes = useStyles();
-  const { name, created, user, mainImage, description, score } = props.item;
+  const { name_english, name_japanese, name_japanese_ruby, created, user, mainImage, description, score } = props.item;
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleClickItem = () => {
@@ -41,9 +41,9 @@ const ItemCard = (props) => {
             title="Image title"
           />
           <CardContent >
-            <div className="content">
-              <div className="title">{name}</div>
-              <div className='main'>
+            <div className={styles.content}>
+              <div className={styles.title}>{name_english + ' / ' + name_japanese}</div>
+              <div className={styles.main}>
                 <ClampLines
                   text={description}
                   id="anime-description-id"
@@ -53,7 +53,7 @@ const ItemCard = (props) => {
                   className="description"
                   innerElement="p"
                 />
-                <div className='score'>{score}</div>
+                <div className={styles.score}>{score}</div>
               </div>    
             </div>
           </CardContent>
@@ -67,7 +67,9 @@ const ItemCard = (props) => {
 ItemCard.propTypes = {
   item: PropTypes.shape({
     id: PropTypes.string.isRequired,
-    name: PropTypes.string.isRequired,
+    name_english: PropTypes.string.isRequired,
+    name_japanese: PropTypes.string.isRequired,
+    name_japanese_ruby: PropTypes.string.isRequired,
     user: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     score: PropTypes.number.isRequired,
