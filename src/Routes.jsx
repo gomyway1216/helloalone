@@ -9,6 +9,7 @@ import TaskListPage from './Page/Task/TaskListPage';
 import SignUpPage from './Page/SignUp/SignUpPage';
 import SignInPage from './Page/SignIn/SignInPage';
 import PrivateRoute from './PrivateRoute';
+import UserRoute from './UserRoute';
 import AdminRoute from './AdminRoute';
 import MyPage from './Page/MyPage/MyPage';
 import ForgotPasswordPage from './Page/ForgotPassword/ForgotPasswordPage';
@@ -25,6 +26,12 @@ import VoiceActorPage from './Page/VoiceActor/VoiceActorPage';
 import AddVoiceActorPage from './Page/VoiceActor/AddVoiceActorPage';
 import AnimeCharacterListPage from './Page/Anime/AnimeCharacterListPage';
 import AddAnimeCharacterPage from './Page/Anime/AddAnimeCharacterPage';
+import UserSignUpPage from './Page/UserSignUp/SignUpPage';
+import UserSignInPage from './Page/UserSignIn/SignInPage';
+import UserProfilePage from './Page/User/UserProfilePage';
+import MyDictionaryListPage from './Page/MyDictionary/MyDictionaryListPage';
+import MyDictionaryPage from './Page/MyDictionary/MyDictionaryPage';
+import AddDictionaryEntryPage from './Page/MyDictionary/AddDictionaryEntryPage';
 
 const Routes = () => {
   return (
@@ -53,6 +60,12 @@ const Routes = () => {
         <AdminRoute path='/edit-voice-actor' component={AddVoiceActorPage} />
         <Route path='/anime-character' component={AnimeCharacterListPage} exact />
         <AdminRoute path='/edit-anime-character' component={AddAnimeCharacterPage} />
+        <Route path='/user-signup' component={UserSignUpPage} />
+        <Route path='/user-signin' component={UserSignInPage} />
+        <Route path='/user-profile' component={UserProfilePage} />
+        <UserRoute path='/my-dictionary' component={MyDictionaryListPage} exact />
+        <UserRoute path='/my-dictionary/add' component={AddDictionaryEntryPage} />
+        <UserRoute path='/my-dictionary/:id' component={MyDictionaryPage} />
       </Switch>
     </div>
   );
