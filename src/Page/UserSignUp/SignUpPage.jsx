@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { TextField, Button } from '@material-ui/core';
 import { Link, useHistory } from 'react-router-dom';
 import { Alert, AlertTitle } from '@material-ui/lab';
-import { useAuth } from '../../Provider/AuthProvider';
-import './SignUpPage.scss';
+import { signUp } from '../../api/auth';
+import styles from './sign-up-page.module.scss';
 
 const defaultInput = {
+  username: '',
   email: '',
   password: '',
   passwordConfirm: ''
@@ -17,12 +18,18 @@ const SignUpPage = () => {
   const [errorText, setErrorText] = useState(defaultInput);
   const [error, setError] = useState('');
   const history = useHistory();
-  const { signUp } = useAuth();
   
   const onSignUp = async () => {
-    const { email, password, passwordConfirm } = itemInput;
+    const { username, email, password, passwordConfirm } = itemInput;
     let validated = true;
     const newErrorText = { ...errorText };
+
+    if (!username) {
+      validated = false;
+      newErrorText.username = 'username is invalid!';
+    } else {
+      newErrorText.username = '';
+    }
 
     const emailValid = email.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);  
     if(!emailValid) {
@@ -56,7 +63,7 @@ const SignUpPage = () => {
     try {
       setError('');
       setLoading(true);
-      await signUp(email, password);
+      await signUp(username, email, password);
       history.push('/');
     } catch (e) {
       setError(e.message);
@@ -73,27 +80,27 @@ const SignUpPage = () => {
   };
 
   return (
-    <div className='signup-page-root'>
-      <div className='signup-wrapper'>
-        <div className='title-wrapper'>
-          <div className='title'>Sign Up</div>
-        </div>
+    <div className={styles.signUpPageRoot}>
+      <div className={styles.signUpWrapper}>
+        <div className={styles.titleWrapper}>Sign Up</div>
         {error && 
           <Alert severity="error">
             <AlertTitle>Error</AlertTitle>
             {error}
           </Alert>
         }
-        <TextField className='input-field' id="email" name="email" label="email" 
+        <TextField className={styles.inputField} id="username" name="username" label="username" 
+          value={itemInput.username} onChange={onItemInputChange} helperText={errorText.username}/>
+        <TextField className={styles.inputField} id="email" name="email" label="email" 
           value={itemInput.email} onChange={onItemInputChange} helperText={errorText.email}/>
-        <TextField className='input-field' id="password" name="password" label="Password" 
+        <TextField className={styles.inputField} id="password" name="password" label="Password" 
           type="password" value={itemInput.password} onChange={onItemInputChange} helperText={errorText.password} />
-        <TextField className='input-field' id="passwordConfirm" name="passwordConfirm" label="Password" 
+        <TextField className={styles.inputField} id="passwordConfirm" name="passwordConfirm" label="Password" 
           type="password" value={itemInput.passwordConfirm} onChange={onItemInputChange} helperText={errorText.passwordConfirm} />
-        <Button variant="contained" color="primary" onClick={onSignUp}>Sign Up</Button>
+        <Button variant="contained" color="primary" onClick={onSignUp}>Sign Up</ Button>
       </div>
       <div>
-        Already have an account? <Link to='/signin'>Sign In</Link>
+        Already have an account? <Link to='/user-signin'>Sign In</Link>
       </div>
     </div>
   );

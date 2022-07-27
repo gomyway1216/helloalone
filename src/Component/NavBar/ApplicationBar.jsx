@@ -8,6 +8,7 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from '../../Provider/AuthProvider';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import './application-bar.scss';
+import { getUser } from '../../storage/tokenService';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -27,6 +28,7 @@ const ApplicationBar = () => {
   const open = Boolean(anchorEl);
   const [error, setError] = useState('');
   const { currentUser, signOut } = useAuth();
+  const user = getUser();
 
   const handleSignOut = async () => {
     setError('');
@@ -122,6 +124,16 @@ const ApplicationBar = () => {
         {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
           <ListItem button key={'Add Anime Tag'} onClick={() => history.push('/add-tag')} >
             <ListItemText primary={'Add Anime Tag'} />
+          </ListItem>
+        }
+        {user && 
+          <ListItem button key={'My dictionary'} onClick={() => history.push('/my-dictionary')} >
+            <ListItemText primary={'My Dictionary'} />
+          </ListItem>
+        }
+        {user && 
+          <ListItem button key={'Add dictionary'} onClick={() => history.push('/my-dictionary/add')} >
+            <ListItemText primary={'Add Dictionary'} />
           </ListItem>
         }
       </List>
