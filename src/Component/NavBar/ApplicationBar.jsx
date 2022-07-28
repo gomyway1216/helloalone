@@ -8,7 +8,8 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from '../../Provider/AuthProvider';
 import { Alert, AlertTitle } from '@material-ui/lab';
 import './application-bar.scss';
-import { getUser } from '../../storage/tokenService';
+import { getUser, removeUser } from '../../storage/tokenService';
+import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -29,6 +30,21 @@ const ApplicationBar = () => {
   const [error, setError] = useState('');
   const { currentUser, signOut } = useAuth();
   const user = getUser();
+
+  const handleUserSignOut = async () => {
+    setError('');
+    try {
+      await removeUser();
+      setAnchorEl(null);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const handleUserSignIn = () => {
+    history.push('/user-signin');
+    setAnchorEl(null);
+  };
 
   const handleSignOut = async () => {
     setError('');
@@ -160,7 +176,7 @@ const ApplicationBar = () => {
               onClick={handleMenu}
               color="inherit"
             >
-              <AccountCircle />
+              <SentimentSatisfiedAltIcon />
             </IconButton>
             <Menu
               id="menu-appbar"
@@ -177,10 +193,9 @@ const ApplicationBar = () => {
               open={open}
               onClose={handleClose}
             >
-              {!currentUser && <MenuItem onClick={handleSignIn}>Sign In</MenuItem>}
-              {currentUser && <MenuItem >{currentUser.userName ? currentUser.userName : currentUser.email.split('@')[0]}</MenuItem>}
-              {currentUser && <MenuItem onClick={handleSignOut}>Sign Out</MenuItem>}
-              {currentUser && <MenuItem onClick={handleMyAccount}>My Page</MenuItem>}
+              {!user && <MenuItem onClick={handleUserSignIn}>User Sign In</MenuItem>}
+              {user && <MenuItem onClick={handleUserSignOut}>Sign Out</MenuItem>}
+              {user && <MenuItem onClick={handleMyAccount}>My Page</MenuItem>}
             </Menu>
             {error && 
               <Alert severity="error">

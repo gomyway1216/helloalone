@@ -10,6 +10,7 @@ import SignUpPage from './Page/SignUp/SignUpPage';
 import SignInPage from './Page/SignIn/SignInPage';
 import PrivateRoute from './PrivateRoute';
 import UserRoute from './UserRoute';
+import AdminUserRoute from './AdminUserRoute';
 import AdminRoute from './AdminRoute';
 import MyPage from './Page/MyPage/MyPage';
 import ForgotPasswordPage from './Page/ForgotPassword/ForgotPasswordPage';
@@ -32,6 +33,7 @@ import UserProfilePage from './Page/User/UserProfilePage';
 import MyDictionaryListPage from './Page/MyDictionary/MyDictionaryListPage';
 import MyDictionaryPage from './Page/MyDictionary/MyDictionaryPage';
 import AddDictionaryEntryPage from './Page/MyDictionary/AddDictionaryEntryPage';
+import AdminCreatePage from './Page/Friend/AdminCreatePage';
 
 const Routes = () => {
   return (
@@ -66,6 +68,7 @@ const Routes = () => {
         <UserRoute path='/my-dictionary' component={MyDictionaryListPage} exact />
         <UserRoute path='/my-dictionary/add' component={AddDictionaryEntryPage} />
         <UserRoute path='/my-dictionary/:id' component={MyDictionaryPage} />
+        <AdminUserRoute path='/friend/admin' component={AdminCreatePage} />
       </Switch>
     </div>
   );

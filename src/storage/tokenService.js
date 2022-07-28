@@ -19,7 +19,7 @@ export const getUser = () => {
 };
 
 export const setUser = (user) => {
-  console.log('setUser is called');
+  console.log('setUser is called', user);
   console.log(JSON.stringify(user));
   localStorage.setItem('user', JSON.stringify(user));
 };

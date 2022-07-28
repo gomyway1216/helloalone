@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useTheme } from '@mui/material/styles';
 import Box from '@mui/material/Box';
 import OutlinedInput from '@mui/material/OutlinedInput';
@@ -20,19 +20,6 @@ const MenuProps = {
   },
 };
 
-// const names = [
-//   'Oliver Hansen',
-//   'Van Henry',
-//   'April Tucker',
-//   'Ralph Hubbard',
-//   'Omar Alexander',
-//   'Carlos Abbott',
-//   'Miriam Wagner',
-//   'Bradley Wilkerson',
-//   'Virginia Andrews',
-//   'Kelly Snyder',
-// ];
-
 function getStyles(name, items, theme) {
   return {
     fontWeight:
@@ -44,22 +31,11 @@ function getStyles(name, items, theme) {
 
 const MultipleSelect = (props) => {
   const theme = useTheme();
-  // const [items, setItems] = useState([]);
-  const { title, list, items, setItems } = props;
+  const { title, name, list, items, setItems } = props;
 
   const handleChange = (e) => {
-    console.log('e', e);
-    const {
-      target: { value },
-    } = e;
-    // setItems(
-    //   // On autofill we get a stringified value.
-    //   typeof value === 'string' ? value.split(',') : value,
-    // );
     setItems(e);
   };
-
-  console.log('items', items);
 
   return (
     <div>
@@ -70,7 +46,7 @@ const MultipleSelect = (props) => {
           id="demo-multiple-chip"
           multiple
           value={items}
-          name={title}
+          name={name}
           onChange={handleChange}
           input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
           renderValue={(selected) => (
@@ -101,6 +77,7 @@ export default MultipleSelect;
 
 MultipleSelect.propTypes = {
   title: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
   list: PropTypes.array.isRequired,
   items: PropTypes.array.isRequired,
   setItems: PropTypes.func.isRequired
