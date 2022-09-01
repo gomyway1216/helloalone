@@ -64,6 +64,14 @@ const AdminCreatePage = () => {
     });
   };
 
+  const onTypeClassificationInputChange = val => {
+    console.log('val!!!!', val);
+    setTypeInput({
+      ...typeInput,
+      ['activityCategories']: val
+    });
+  };
+
   const onCategorySave = async () => {
     let validated = true;
     const newErrorText = { ...errorText };
@@ -118,22 +126,12 @@ const AdminCreatePage = () => {
       newErrorText.typeName = '';
     }
 
-    const activityCategoryIds = [];
     if(!activityCategories || activityCategories.length == 0) {
       validated = false;
       newErrorText.activityCategories = 'activity category cannot be empty. Add at least one category!';
     } else {
-      for(let i = 0; i < activityCategories.length; i++) {
-        const item = activityCategoryEntryList.find(e => e.name === activityCategories[i]);
-        activityCategoryIds.push(item.id);
-      }
-      if(activityCategoryIds.length !== activityCategories.length) {
-        newErrorText.activityCategories = 'some category Ids does not exist. Please check them again!';
-      } else {
-        newErrorText.activityCategories = '';
-      }
     }
-
+    const activityCategoryIds = activityCategories.map(e => e.id);
 
     if(!validated) {
       setErrorText(newErrorText);
@@ -194,7 +192,8 @@ const AdminCreatePage = () => {
         <h1>Activity Type List</h1>
         <div>
           <TextField label="Activity Type" value={typeInput.typeName} name="typeName" onChange={onTypeInputChange}/>
-          <MultipleSelect title="Category" name="activityCategories" list={activityCategoryEntryList} items={typeInput.activityCategories} setItems={onTypeInputChange}/>
+          <MultipleSelect title="Category" name="activityCategories" list={activityCategoryEntryList} 
+            items={typeInput.activityCategories} setItems={onTypeClassificationInputChange} freeSolo={true}/>
           <Button variant="contained" color="primary" onClick={onTypeSave}>Save</Button>
           <div>
             {activityTypeEntryList.map((entry) => 

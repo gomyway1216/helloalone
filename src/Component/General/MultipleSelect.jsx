@@ -1,13 +1,10 @@
 import React from 'react';
 import { useTheme } from '@mui/material/styles';
-import Box from '@mui/material/Box';
-import OutlinedInput from '@mui/material/OutlinedInput';
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
 import Chip from '@mui/material/Chip';
 import PropTypes from 'prop-types';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -31,43 +28,46 @@ function getStyles(name, items, theme) {
 
 const MultipleSelect = (props) => {
   const theme = useTheme();
-  const { title, name, list, items, setItems } = props;
+  const { title, name, list, items, setItems, freeSolo } = props;
 
-  const handleChange = (e) => {
-    setItems(e);
+  const handleChange = (val) => {
+    setItems(val);
   };
 
   return (
     <div>
       <FormControl sx={{ m: 1, width: 300 }}>
-        <InputLabel id="demo-multiple-chip-label">{title}</InputLabel>
-        <Select
-          labelId="demo-multiple-chip-label"
-          id="demo-multiple-chip"
+        <Autocomplete
+          freeSolo={freeSolo}
           multiple
+          id={title}
           value={items}
-          name={name}
-          onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Chip" />}
-          renderValue={(selected) => (
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-              {selected.map((value) => (
-                <Chip key={value} label={value} />
-              ))}
-            </Box>
+          onChange={(event, newValue) => {
+            if(typeof newValue[newValue.length - 1] === 'string') {
+              newValue[newValue.length - 1] = {
+                id: null,
+                name: newValue[newValue.length - 1]
+              };
+            }
+            handleChange([...newValue]);
+          }}
+          options={list}
+          getOptionLabel={(option) => option.name}
+          renderTags={(values, getTagProps) =>
+            values.map((option, index) => (
+              <Chip key={index} label={option.name} {...getTagProps({ index })} />
+            ))
+          }
+          style={{ width: 500 }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              label={title}
+              variant="outlined"
+              placeholder="Favorites"
+            />
           )}
-          MenuProps={MenuProps}
-        >
-          {list.map((item) => (
-            <MenuItem
-              key={item.id}
-              value={item.name}
-              style={getStyles(item, items, theme)}
-            >
-              {item.name}
-            </MenuItem>
-          ))}
-        </Select>
+        />
       </FormControl>
     </div>
   );
@@ -80,5 +80,6 @@ MultipleSelect.propTypes = {
   name: PropTypes.string.isRequired,
   list: PropTypes.array.isRequired,
   items: PropTypes.array.isRequired,
-  setItems: PropTypes.func.isRequired
+  setItems: PropTypes.func.isRequired,
+  freeSolo: PropTypes.bool.isRequired
 };

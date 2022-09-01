@@ -98,7 +98,10 @@ const ItemListInteract = (props) => {
               onTagInputChange([...newValue]);
             }}
             options={tags}
-            getOptionLabel={(option) => option.name}
+            getOptionLabel={(option) => {
+              console.log('option', option);
+              return option.name;}
+            }
             renderTags={(tagValue, getTagProps) =>
               tagValue.map((option, index) => (
                 <Chip key={index} label={option.name} {...getTagProps({ index })} />
