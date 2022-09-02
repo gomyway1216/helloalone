@@ -5,6 +5,7 @@ import { useHistory } from 'react-router-dom';
 import { Button, TextField } from '@material-ui/core';
 import { useAuth } from '../../Provider/AuthProvider';
 import ResponseDialog from '../../Component/Dialog/ResponseDialog';
+import styles from './add-voice-actor-page.module.scss';
 
 const responseDialogDefaultVal = {
   isError: true,
@@ -105,7 +106,7 @@ const AddVoiceActorPage = (props) => {
   };
 
   return (
-    <div>
+    <div className={styles.root}>
       <h1>Add Voice Actor</h1>
       <div>
         <div>Main Image</div>

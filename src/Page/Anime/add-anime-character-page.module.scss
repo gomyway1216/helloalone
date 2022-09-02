@@ -1,8 +1,13 @@
-.submission {
-  display: flex;
-  justify-content: flex-end;
+.root {
+  width: 80vw;;
 
-  .button {
-    margin: 10px;
+  .submission {
+    display: flex;
+    justify-content: flex-end;
+  
+    .button {
+      margin: 10px;
+    }
   }
 }
+

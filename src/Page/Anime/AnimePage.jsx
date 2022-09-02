@@ -99,7 +99,7 @@ const AnimePage = () => {
   }
 
   return (
-    <div>
+    <div className={styles.root}>
       <div className={styles.titleWrapper}>
         <div className={styles.title}>Anime/Manga List</div>
         <IconButton aria-label="criteria" color="primary" className={styles.criteriaIconButton} onClick={handleCriteriaOpen}>

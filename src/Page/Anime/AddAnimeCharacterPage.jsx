@@ -142,7 +142,7 @@ const AddAnimeCharacterPage = (props) => {
   };
 
   return (
-    <div>
+    <div className={styles.root}>
       <h1>Add Anime Character</h1>
       <div>
         <div>Main Image</div>
