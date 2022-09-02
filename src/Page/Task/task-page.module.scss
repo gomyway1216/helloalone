@@ -1,0 +1,32 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 90vw;
+  
+  .item {
+    margin: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    .slider {
+      width: 100%;
+
+      .title {
+        text-align: center;
+      }
+    }
+  }
+
+  .buttons {
+    padding: 10px;
+    background-color: AliceBlue;
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    opacity: 1;
+  }
+}

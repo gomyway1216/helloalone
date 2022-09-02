@@ -79,7 +79,7 @@ const VoiceActorListPage = () => {
   }
 
   return (
-    <div>
+    <div className={styles.root}>
       <div className={styles.titleWrapper}>
         <div className={styles.title}>Anime/Manga List</div>
       </div>

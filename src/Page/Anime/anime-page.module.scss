@@ -1,31 +1,36 @@
-.titleWrapper {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  .title {
+.root {
+  width: 80vw;
+
+  .titleWrapper {
     display: flex;
     justify-content: center;
-    font-weight: bold;
-    font-size: 1.8rem;
-    margin-top: auto;
-    margin-bottom: auto;
+    margin-top: 20px;
+    .title {
+      display: flex;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.8rem;
+      margin-top: auto;
+      margin-bottom: auto;
+    }
+  
+    .criteriaIconButton {
+      display: flex;
+      justify-content: center;
+    }
   }
-
-  .criteriaIconButton {
+  
+  .search {
     display: flex;
     justify-content: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .itemList {
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
   }
 }
 
-.search {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-.itemList {
-  display: flex;
-  justify-content: space-evenly;
-  flex-wrap: wrap;
-}

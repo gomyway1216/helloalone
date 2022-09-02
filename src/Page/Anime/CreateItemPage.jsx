@@ -166,7 +166,7 @@ const CreateItemPage = (props) => {
   }
 
   return (
-    <div>
+    <div className={styles.root}>
       <h1>Create item</h1>
       <div>
         <div>Main Image</div>

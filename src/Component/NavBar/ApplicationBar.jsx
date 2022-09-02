@@ -86,9 +86,9 @@ const ApplicationBar = () => {
             <ListItemText primary={'Create Blog'} />
           </ListItem>
         }
-        {(currentUser && currentUser.uid === process.env.REACT_APP_DEFAULT_USER) && 
-          <ListItem button key={'Task List'} onClick={() => history.push('/task')} >
-            <ListItemText primary={'Task List'} />
+        {currentUser && 
+          <ListItem button key={'Task'} onClick={() => history.push('/task')} >
+            <ListItemText primary={'Task'} />
           </ListItem>
         }
         <ListItem button key={'Chat'} onClick={() => history.push('/chat')} >
